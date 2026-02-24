@@ -8,8 +8,9 @@
 *.so
 *.dylib
 
-# Test binary, built with `go test -c`
+# Test files, built with `go test -c`
 *.test
+test/
 
 # Code coverage profiles and other test artifacts
 *.out
@@ -27,6 +28,12 @@ go.work.sum
 # env file
 .env
 
+# text file
+*.txt
+
 # Editor/IDE
 # .idea/
-# .vscode/
+.vscode/
+
+# Golang
+go.sum
