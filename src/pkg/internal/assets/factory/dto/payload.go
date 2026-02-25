@@ -3,6 +3,7 @@ package dto
 import "github.com/antoniofrisenda/template-service/src/pkg/internal/assets/model"
 
 type TemplatePayload struct {
+	ID       string             `json:"id,omitempty"`
 	Name     string             `json:"name"`
 	Summary  string             `json:"summary"`
 	Type     model.TemplateType `json:"type"`

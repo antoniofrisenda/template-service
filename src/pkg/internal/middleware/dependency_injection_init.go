@@ -68,16 +68,14 @@ func RegisterInternalRoute(app *fiber.App, ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	if err := s3Client.GetBucket(ctx); err != nil {
+	if err := s3Client.EnsureBucketExists(ctx); err != nil {
 		panic(err)
 	}
-
-	templateMapper := helper.NewTemplateMapper(helper.NewRegistry())
 
 	controller := router.NewTemplateController(
 		service.NewTemplateService(
 			s3Client,
-			templateMapper,
+			helper.NewTemplateMapper(helper.NewRegistry()),
 			repository.NewTemplateRepository(client.GetConnection().Collection("templates")),
 			service.NewResolver(),
 		),

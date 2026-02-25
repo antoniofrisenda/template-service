@@ -146,6 +146,53 @@ func (s *TemplateService) Create(ctx context.Context, payload dto.TemplatePayloa
 	return result, nil
 }
 
+func (s *TemplateService) CreateByUploadingFile(ctx context.Context, input []byte, name string, summary string, templateType model.TemplateType, contentType model.ContentType) (*dto.TemplatePayload, error) {
+	fileText, err := s.resolver.ParseFileContent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	var extractedVars []string
+	if contentType == model.HTML || contentType == model.PLAIN_TEXT {
+		extractedVars, err = s.resolver.ExtractVariables(ctx, fileText, string(contentType))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	resourcePayload := dto.ResourcePayload{
+		Variables: extractedVars,
+	}
+
+	key := primitive.NewObjectID().Hex()
+
+	if contentType == model.PLAIN_TEXT {
+		resourcePayload.Text = fileText
+	} else {
+		resourcePayload.URL = fmt.Sprintf("s3://%s/%s", s.s3.GetBucket(), key)
+	}
+
+	create, err := s.Create(ctx, dto.TemplatePayload{
+		ID:       key,
+		Name:     name,
+		Summary:  summary,
+		Type:     templateType,
+		Content:  contentType,
+		Resource: resourcePayload,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if contentType != model.PLAIN_TEXT {
+		if err := s.s3.UploadBytes(ctx, key, input, string(contentType)); err != nil {
+			return nil, err
+		}
+	}
+
+	return create, nil
+}
+
 func (s *TemplateService) Patch(ctx context.Context, id string, payload dto.TemplatePayload) (*dto.TemplatePayload, error) {
 	start := time.Now()
 	log.WithContext(ctx).Infof("[TemplateService.Patch] status=started id=%s", id)
@@ -304,58 +351,4 @@ func NewTemplateService(s3 aws.IS3ClientService, mapper helper.ITemplateMapper, 
 		mapper:   mapper,
 		resolver: resolver,
 	}
-}
-
-func (s *TemplateService) CreateByUploadingFile(ctx context.Context, input []byte, name string, summary string, templateType model.TemplateType, contentType model.ContentType) (*dto.TemplatePayload, error) {
-	fileText, err := s.resolver.ParseFileContent(ctx, input)
-	if err != nil {
-		return nil, err
-	}
-
-	var extractedVars []string
-	if contentType == model.HTML || contentType == model.PLAIN_TEXT {
-		extractedVars, err = s.resolver.ExtractVariables(ctx, fileText, string(contentType))
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	resourcePayload := dto.ResourcePayload{
-		Variables: extractedVars,
-	}
-	if contentType == model.PLAIN_TEXT {
-		resourcePayload.Text = fileText
-	} else {
-		resourcePayload.URL = fmt.Sprintf("s3:///%s", name)
-	}
-
-	templateModel, err := s.mapper.ToTemplate(dto.TemplatePayload{
-		Name:     name,
-		Summary:  summary,
-		Type:     templateType,
-		Content:  contentType,
-		Resource: resourcePayload,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	id, err := s.repo.InsertIntoDB(ctx, templateModel)
-	if err != nil {
-		return nil, err
-	}
-	templateModel.ID = id
-
-	if contentType != model.PLAIN_TEXT {
-		if err := s.s3.UploadBytes(ctx, templateModel.ID.Hex(), input, string(templateModel.Content)); err != nil {
-			return nil, err
-		}
-	}
-
-	payload, err := s.mapper.ToPayload(*templateModel)
-	if err != nil {
-		return nil, err
-	}
-
-	return payload, nil
 }

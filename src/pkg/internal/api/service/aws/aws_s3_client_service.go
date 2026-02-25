@@ -15,7 +15,8 @@ import (
 )
 
 type IS3ClientService interface {
-	GetBucket(ctx context.Context) error
+	GetBucket() string
+	EnsureBucketExists(ctx context.Context) error
 	UploadBase64(ctx context.Context, key string, data string, contentType string) error
 	UploadBytes(ctx context.Context, key string, data []byte, contentType string) error
 	DownloadBase64(ctx context.Context, key string) (string, error)
@@ -51,8 +52,11 @@ func NewS3ClientService(ctx context.Context, region string, bucket string, acces
 		region:    region,
 	}, nil
 }
+func (s *S3ClientService) GetBucket() string {
+	return s.bucket
+}
 
-func (s *S3ClientService) GetBucket(ctx context.Context) error {
+func (s *S3ClientService) EnsureBucketExists(ctx context.Context) error {
 	_, err := s.client.HeadBucket(ctx, &s3.HeadBucketInput{Bucket: &s.bucket})
 	if err == nil {
 		return nil

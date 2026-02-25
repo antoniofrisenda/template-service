@@ -3,6 +3,7 @@ package helper
 import (
 	"github.com/antoniofrisenda/template-service/src/pkg/internal/assets/factory/dto"
 	"github.com/antoniofrisenda/template-service/src/pkg/internal/assets/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ITemplateMapper interface {
@@ -31,7 +32,16 @@ func (tm *TemplateMapper) ToTemplate(d dto.TemplatePayload) (*model.Template, er
 		return nil, err
 	}
 
+	id := primitive.NilObjectID
+	if d.ID != "" {
+		id, err = primitive.ObjectIDFromHex(d.ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &model.Template{
+		ID:       id,
 		Name:     d.Name,
 		Summary:  d.Summary,
 		Type:     d.Type,
@@ -52,6 +62,7 @@ func (tm *TemplateMapper) ToPayload(m model.Template) (*dto.TemplatePayload, err
 	}
 
 	return &dto.TemplatePayload{
+		ID:       m.ID.Hex(),
 		Name:     m.Name,
 		Summary:  m.Summary,
 		Type:     m.Type,
