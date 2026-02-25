@@ -44,7 +44,7 @@ func NewTemplateController(service service.ITemplateService) ITemplateController
 func (tc *TemplateController) FindTemplate(c fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "missing param=%s:", id)
+		return fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("missing param=%s:", id))
 	}
 
 	find, err := tc.service.Find(c, id)
@@ -56,7 +56,11 @@ func (tc *TemplateController) FindTemplate(c fiber.Ctx) error {
 }
 
 func (tc *TemplateController) FindTemplateByName(c fiber.Ctx) error {
-	var name string
+	name := strings.TrimSpace(c.Query("name"))
+	if name == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing query param=name")
+	}
+
 	find, err := tc.service.SearchTemplateName(c, name)
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, fmt.Sprintf("failed to find template=%v: %s", find, err.Error()))
@@ -66,8 +70,12 @@ func (tc *TemplateController) FindTemplateByName(c fiber.Ctx) error {
 }
 
 func (tc *TemplateController) FindTemplateBySummary(c fiber.Ctx) error {
-	var period string
-	find, err := tc.service.Find(c, period)
+	summary := strings.TrimSpace(c.Query("summary"))
+	if summary == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "missing query param=summary")
+	}
+
+	find, err := tc.service.SearchTemplateSummary(c, summary)
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, fmt.Sprintf("failed to find template=%v: %s", find, err.Error()))
 	}
@@ -92,7 +100,7 @@ func (tc *TemplateController) CreateTemplate(c fiber.Ctx) error {
 func (tc *TemplateController) PatchTemplate(c fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "missing param=%s:", id)
+		return fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("missing param=%s:", id))
 	}
 
 	var payload dto.TemplatePayload
