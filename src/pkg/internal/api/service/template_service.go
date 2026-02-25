@@ -2,227 +2,360 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/antoniofrisenda/template-service/src/pkg/internal/api/repository"
 	"github.com/antoniofrisenda/template-service/src/pkg/internal/api/service/aws"
 	"github.com/antoniofrisenda/template-service/src/pkg/internal/assets/factory/dto"
 	"github.com/antoniofrisenda/template-service/src/pkg/internal/assets/factory/helper"
+	"github.com/antoniofrisenda/template-service/src/pkg/internal/assets/model"
 	"github.com/gofiber/fiber/v3/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ITemplateService interface {
-	Find(ctx context.Context, id string) (*dto.TemplatetPayload, error)
-	Create(ctx context.Context, dto dto.TemplatetPayload) (*dto.TemplatetPayload, error)
+	Find(ctx context.Context, id string) (*dto.TemplatePayload, error)
 
-	Patch(ctx context.Context, id string, dto dto.TemplatetPayload) (*dto.TemplatetPayload, error)
+	SearchTemplateName(ctx context.Context, name string) (*dto.TemplatePayload, error)
 
+	SearchTemplateSummary(ctx context.Context, filter string) (*dto.TemplatePayload, error)
+	Create(ctx context.Context, payload dto.TemplatePayload) (*dto.TemplatePayload, error)
+
+	CreateByUploadingFile(ctx context.Context, input []byte, name string, summary string, templateType model.TemplateType, contentType model.ContentType) (*dto.TemplatePayload, error)
+	Patch(ctx context.Context, id string, payload dto.TemplatePayload) (*dto.TemplatePayload, error)
 	Delete(ctx context.Context, id string) (bool, error)
 
 	UploadBase64(ctx context.Context, key string, data string, contentType string) error
-
-	UploadBytes(ctx context.Context, key string, stream []byte, contentType string) error
+	UploadBytes(ctx context.Context, key string, data []byte, contentType string) error
 
 	DownloadBase64(ctx context.Context, key string) (string, error)
-
 	DownloadBytes(ctx context.Context, key string) ([]byte, error)
 
-	GetPresignedURL(ctx context.Context, key string) (string, error)
+	DownloadByPresignedURL(ctx context.Context, key string) (string, error)
 }
 
 type TemplateService struct {
-	repo repository.ITemplateRepository
-	s3   aws.IS3ClientService
+	repo     repository.ITemplateRepository
+	resolver IResolver
+	s3       aws.IS3ClientService
+	mapper   helper.ITemplateMapper
 }
 
-func NewTemplateService(repo repository.ITemplateRepository, s3 aws.IS3ClientService) ITemplateService {
-	return &TemplateService{
-		repo: repo,
-		s3:   s3,
-	}
-}
-
-//CRUD
-
-func (s *TemplateService) Find(ctx context.Context, id string) (*dto.TemplatetPayload, error) {
+func (s *TemplateService) Find(ctx context.Context, id string) (*dto.TemplatePayload, error) {
 	start := time.Now()
-	log.WithContext(ctx).Infof("[TemplateService.Find] status=started target=%s", id)
+	log.WithContext(ctx).Infof("[TemplateService.Find] status=started id=%s", id)
 
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Find] step=ObjectIDFromHex(id) status=failed target_id=%s error=%q duration=%v", id, err, time.Since(start))
+		log.WithContext(ctx).Errorf("[TemplateService.Find] status=failed id=%s error=%v duration=%v", id, err, time.Since(start))
 		return nil, err
 	}
 
-	find, err := s.repo.FindByID(ctx, objectID)
+	entity, err := s.repo.GetByID(ctx, objectID)
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Find] step=repo.FindByID(ctx, objectID) status=failed target_id=%s error=%q duration=%v", id, err, time.Since(start))
+		log.WithContext(ctx).Errorf("[TemplateService.Find] status=failed id=%s error=%v duration=%v", id, err, time.Since(start))
 		return nil, err
 	}
 
-	log.WithContext(ctx).Infof("[TemplateService.Find] status=success step=done target_id=%s duration=%v", id, time.Since(start))
-	return helper.ToPayload(*find), nil
+	payload, err := s.mapper.ToPayload(*entity)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Find] status=failed id=%s error=%v duration=%v", id, err, time.Since(start))
+		return nil, err
+	}
 
+	log.WithContext(ctx).Infof("[TemplateService.Find] status=success id=%s duration=%v", id, time.Since(start))
+	return payload, nil
 }
 
-func (s *TemplateService) Create(ctx context.Context, dto dto.TemplatetPayload) (*dto.TemplatetPayload, error) {
+func (s *TemplateService) SearchTemplateName(ctx context.Context, name string) (*dto.TemplatePayload, error) {
 	start := time.Now()
-	log.WithContext(ctx).Infof("[TemplateService.Create] status=started")
+	log.WithContext(ctx).Infof("[TemplateService.FindByName] status=started name=%s", name)
 
-	t := helper.ToTemplate(dto)
-	if err := helper.ValidateTemplate(t); err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Create] step=ValidateTemplate status=failed error=%q duration=%v", err, time.Since(start))
-		return nil, err
-	}
-
-	id, err := s.repo.Insert(ctx, &t)
+	entity, err := s.repo.GetByName(ctx, name)
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Create] step=repo.Insert status=failed error=%q duration=%v", err, time.Since(start))
+		log.WithContext(ctx).Errorf("[TemplateService.FindByName] status=failed id=%s error=%v duration=%v", name, err, time.Since(start))
 		return nil, err
 	}
 
-	created, err := s.repo.FindByID(ctx, id)
+	payload, err := s.mapper.ToPayload(*entity)
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Create] step=repo.FindByID status=failed target_id=%s error=%q duration=%v", id.Hex(), err, time.Since(start))
+		log.WithContext(ctx).Errorf("[TemplateService.FindByName] status=failed id=%s error=%v duration=%v", name, err, time.Since(start))
 		return nil, err
 	}
 
-	log.WithContext(ctx).Infof("[TemplateService.Create] status=success target_id=%s duration=%v", id.Hex(), time.Since(start))
-	return helper.ToPayload(*created), nil
+	log.WithContext(ctx).Infof("[TemplateService.FindByName] status=success id=%s duration=%v", name, time.Since(start))
+	return payload, nil
 }
 
+func (s *TemplateService) SearchTemplateSummary(ctx context.Context, filter string) (*dto.TemplatePayload, error) {
+	start := time.Now()
+	log.WithContext(ctx).Infof("[TemplateService.FindByName] status=started filter=%s", filter)
+
+	entity, err := s.repo.GetBySummary(ctx, filter)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.FindByName] status=failed id=%s error=%v duration=%v", filter, err, time.Since(start))
+		return nil, err
+	}
+
+	payload, err := s.mapper.ToPayload(*entity)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.FindByName] status=failed id=%s error=%v duration=%v", filter, err, time.Since(start))
+		return nil, err
+	}
+
+	log.WithContext(ctx).Infof("[TemplateService.FindByName] status=success id=%s duration=%v", filter, time.Since(start))
+	return payload, nil
+}
+
+func (s *TemplateService) Create(ctx context.Context, payload dto.TemplatePayload) (*dto.TemplatePayload, error) {
+	start := time.Now()
+	log.WithContext(ctx).Info("[TemplateService.Create] status=started")
+
+	entity, err := s.mapper.ToTemplate(payload)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Create] status=failed error=%v duration=%v", err, time.Since(start))
+		return nil, err
+	}
+
+	if err := helper.ValidateTemplate(*entity); err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Create] status=failed error=%v duration=%v", err, time.Since(start))
+		return nil, err
+	}
+
+	id, err := s.repo.InsertIntoDB(ctx, entity)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Create] status=failed error=%v duration=%v", err, time.Since(start))
+		return nil, err
+	}
+
+	create, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Create] status=failed id=%s error=%v duration=%v", id.Hex(), err, time.Since(start))
+		return nil, err
+	}
+
+	result, err := s.mapper.ToPayload(*create)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Create] status=failed id=%s error=%v duration=%v", id.Hex(), err, time.Since(start))
+		return nil, err
+	}
+
+	log.WithContext(ctx).Infof("[TemplateService.Create] status=success id=%s duration=%v", id.Hex(), time.Since(start))
+	return result, nil
+}
+
+func (s *TemplateService) Patch(ctx context.Context, id string, payload dto.TemplatePayload) (*dto.TemplatePayload, error) {
+	start := time.Now()
+	log.WithContext(ctx).Infof("[TemplateService.Patch] status=started id=%s", id)
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Patch] status=failed id=%s error=%v duration=%v", id, err, time.Since(start))
+		return nil, err
+	}
+
+	entity, err := s.mapper.ToTemplate(payload)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Patch] status=failed id=%s error=%v duration=%v", id, err, time.Since(start))
+		return nil, err
+	}
+
+	if err := helper.ValidateTemplate(*entity); err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Patch] status=failed id=%s error=%v duration=%v", id, err, time.Since(start))
+		return nil, err
+	}
+
+	update := bson.M{}
+	data, err := bson.Marshal(entity)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Patch] status=failed id=%s marshal error=%v duration=%v", id, err, time.Since(start))
+		return nil, err
+	}
+	if err := bson.Unmarshal(data, &update); err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Patch] status=failed id=%s unmarshal error=%v duration=%v", id, err, time.Since(start))
+		return nil, err
+	}
+
+	if err := s.repo.UpdateByID(ctx, objectID, update); err != nil {
+		log.WithContext(ctx).Errorf(
+			"[TemplateService.Patch] status=failed id=%s patch error=%v duration=%v",
+			id, err, time.Since(start),
+		)
+		return nil, err
+	}
+
+	updated, err := s.repo.GetByID(ctx, objectID)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Patch] status=failed id=%s reload error=%v duration=%v", id, err, time.Since(start))
+		return nil, err
+	}
+
+	result, err := s.mapper.ToPayload(*updated)
+	if err != nil {
+		log.WithContext(ctx).Errorf("[TemplateService.Patch] status=failed id=%s mapping response error=%v duration=%v", id, err, time.Since(start))
+		return nil, err
+	}
+
+	log.WithContext(ctx).Infof("[TemplateService.Patch] status=success id=%s duration=%v", id, time.Since(start))
+	return result, nil
+}
 func (s *TemplateService) Delete(ctx context.Context, id string) (bool, error) {
 	start := time.Now()
-	log.WithContext(ctx).Infof("[TemplateService.Delete] status=started target=%s", id)
+	log.WithContext(ctx).Infof("[TemplateService.Delete] status=started id=%s", id)
 
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Delete] step=ObjectIDFromHex(id) status=failed target_id=%s error=%q duration=%v", id, err, time.Since(start))
+		log.WithContext(ctx).Errorf("[TemplateService.Delete] status=failed id=%s error=%v duration=%v", id, err, time.Since(start))
 		return false, err
 	}
 
 	if err := s.repo.DeleteByID(ctx, objectID); err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Delete] step=repo.DeleteByID status=failed target_id=%s error=%q duration=%v", id, err, time.Since(start))
+		log.WithContext(ctx).Errorf("[TemplateService.Delete] status=failed id=%s error=%v duration=%v", id, err, time.Since(start))
 		return false, err
 	}
 
-	log.WithContext(ctx).Infof("[TemplateService.Delete] status=success target_id=%s duration=%v", id, time.Since(start))
+	log.WithContext(ctx).Infof("[TemplateService.Delete] status=success id=%s duration=%v", id, time.Since(start))
 	return true, nil
 }
 
-func (s *TemplateService) Patch(ctx context.Context, id string, dto dto.TemplatetPayload) (*dto.TemplatetPayload, error) {
-	start := time.Now()
-	log.WithContext(ctx).Infof("[TemplateService.Patch] status=started target=%s", id)
-
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Patch] step=ObjectIDFromHex(id) status=failed target_id=%s error=%q duration=%v", id, err, time.Since(start))
-		return nil, err
-	}
-
-	t := helper.ToTemplate(dto)
-	if err := helper.ValidateTemplate(t); err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Patch] step=ValidateTemplate status=failed target_id=%s error=%q duration=%v", id, err, time.Since(start))
-		return nil, err
-	}
-
-	update := bson.M{
-		"name":    t.Name,
-		"summary": t.Summary,
-		"type":    t.Type,
-		"content": t.Content,
-		"resource": bson.M{
-			"url":       t.Resource.URL,
-			"text":      t.Resource.Text,
-			"variables": t.Resource.Variables,
-		},
-	}
-
-	if err := s.repo.Patch(ctx, objectID, update); err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Patch] step=repo.Patch status=failed target_id=%s error=%q duration=%v", id, err, time.Since(start))
-		return nil, err
-	}
-
-	updated, err := s.repo.FindByID(ctx, objectID)
-	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.Patch] step=repo.FindByID status=failed target_id=%s error=%q duration=%v", id, err, time.Since(start))
-		return nil, err
-	}
-
-	log.WithContext(ctx).Infof("[TemplateService.Patch] status=success target_id=%s duration=%v", id, time.Since(start))
-	return helper.ToPayload(*updated), nil
-}
-
-//S3
-
 func (s *TemplateService) UploadBase64(ctx context.Context, key string, data string, contentType string) error {
 	start := time.Now()
-	log.WithContext(ctx).Infof("[TemplateService.UploadBase64] status=started target=%s", key)
+	log.WithContext(ctx).Infof("[TemplateService.UploadBase64] status=started key=%s", key)
 
 	err := s.s3.UploadBase64(ctx, key, data, contentType)
+
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.UploadBase64] step=s3.UploadBase64 status=failed target=%s error=%q duration=%v", key, err, time.Since(start))
+		log.WithContext(ctx).Errorf("[TemplateService.UploadBase64] status=failed key=%s error=%v duration=%v", key, err, time.Since(start))
 		return err
 	}
 
-	log.WithContext(ctx).Infof("[TemplateService.UploadBase64] status=success target=%s duration=%v", key, time.Since(start))
+	log.WithContext(ctx).Infof("[TemplateService.UploadBase64] status=success key=%s duration=%v", key, time.Since(start))
 	return nil
 }
 
-func (s *TemplateService) UploadBytes(ctx context.Context, key string, stream []byte, contentType string) error {
+func (s *TemplateService) UploadBytes(ctx context.Context, key string, data []byte, contentType string) error {
 	start := time.Now()
-	log.WithContext(ctx).Infof("[TemplateService.UploadBytes] status=started target=%s", key)
+	log.WithContext(ctx).Infof("[TemplateService.UploadBytes] status=started key=%s", key)
 
-	err := s.s3.UploadBytes(ctx, key, stream, contentType)
+	err := s.s3.UploadBytes(ctx, key, data, contentType)
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.UploadBytes] step=s3.UploadBytes status=failed target=%s error=%q duration=%v", key, err, time.Since(start))
+		log.WithContext(ctx).Errorf("[TemplateService.UploadBytes] status=failed key=%s error=%v duration=%v", key, err, time.Since(start))
 		return err
 	}
 
-	log.WithContext(ctx).Infof("[TemplateService.UploadBytes] status=success target=%s duration=%v", key, time.Since(start))
+	log.WithContext(ctx).Infof("[TemplateService.UploadBytes] status=success key=%s duration=%v", key, time.Since(start))
 	return nil
 }
 
 func (s *TemplateService) DownloadBase64(ctx context.Context, key string) (string, error) {
 	start := time.Now()
-	log.WithContext(ctx).Infof("[TemplateService.DownloadBase64] status=started target=%s", key)
+	log.WithContext(ctx).Infof("[TemplateService.DownloadBase64] status=started key=%s", key)
 
 	data, err := s.s3.DownloadBase64(ctx, key)
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.DownloadBase64] step=s3.DownloadBase64 status=failed target=%s error=%q duration=%v", key, err, time.Since(start))
+		log.WithContext(ctx).Errorf(
+			"[TemplateService.DownloadBase64] status=failed key=%s error=%v duration=%v",
+			key, err, time.Since(start),
+		)
 		return "", err
 	}
 
-	log.WithContext(ctx).Infof("[TemplateService.DownloadBase64] status=success target=%s duration=%v", key, time.Since(start))
+	log.WithContext(ctx).Infof("[TemplateService.DownloadBase64] status=success key=%s duration=%v", key, time.Since(start))
 	return data, nil
 }
 
 func (s *TemplateService) DownloadBytes(ctx context.Context, key string) ([]byte, error) {
 	start := time.Now()
-	log.WithContext(ctx).Infof("[TemplateService.DownloadBytes] status=started target=%s", key)
+	log.WithContext(ctx).Infof("[TemplateService.DownloadBytes] status=started key=%s", key)
 
 	data, err := s.s3.DownloadBytes(ctx, key)
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.DownloadBytes] step=s3.DownloadBytes status=failed target=%s error=%q duration=%v", key, err, time.Since(start))
+		log.WithContext(ctx).Errorf(
+			"[TemplateService.DownloadBytes] status=failed key=%s error=%v duration=%v",
+			key, err, time.Since(start),
+		)
 		return nil, err
 	}
 
-	log.WithContext(ctx).Infof("[TemplateService.DownloadBytes] status=success target=%s duration=%v", key, time.Since(start))
+	log.WithContext(ctx).Infof("[TemplateService.DownloadBytes] status=success key=%s duration=%v", key, time.Since(start))
 	return data, nil
 }
 
-func (s *TemplateService) GetPresignedURL(ctx context.Context, key string) (string, error) {
+func (s *TemplateService) DownloadByPresignedURL(ctx context.Context, key string) (string, error) {
 	start := time.Now()
-	log.WithContext(ctx).Infof("[TemplateService.GetPresignedURL] status=started target=%s", key)
+	log.WithContext(ctx).Infof("[TemplateService.DownloadByPresignedURL] status=started id=%s", key)
 
-	url, err := s.s3.GetPresignedURL(ctx, key, 15*time.Minute)
+	url, err := s.s3.GetPresignedURL(ctx, key, 10*time.Minute)
 	if err != nil {
-		log.WithContext(ctx).Errorf("[TemplateService.GetPresignedURL] step=s3.GetPresignedURL status=failed target=%s error=%q duration=%v", key, err, time.Since(start))
+		log.WithContext(ctx).Errorf("[TemplateService.DownloadByPresignedURL] status=failed id=%s error=%v duration=%v", key, err, time.Since(start))
 		return "", err
 	}
 
-	log.WithContext(ctx).Infof("[TemplateService.GetPresignedURL] status=success target=%s duration=%v", key, time.Since(start))
-	return url, nil
+	log.WithContext(ctx).Infof("[TemplateService.Find] status=success id=%s duration=%v", key, time.Since(start))
+	return url, err
+}
+
+func NewTemplateService(s3 aws.IS3ClientService, mapper helper.ITemplateMapper, repo repository.ITemplateRepository, resolver IResolver) ITemplateService {
+	return &TemplateService{
+		repo:     repo,
+		s3:       s3,
+		mapper:   mapper,
+		resolver: resolver,
+	}
+}
+
+func (s *TemplateService) CreateByUploadingFile(ctx context.Context, input []byte, name string, summary string, templateType model.TemplateType, contentType model.ContentType) (*dto.TemplatePayload, error) {
+	fileText, err := s.resolver.ParseFileContent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	var extractedVars []string
+	if contentType == model.HTML || contentType == model.PLAIN_TEXT {
+		extractedVars, err = s.resolver.ExtractVariables(ctx, fileText, string(contentType))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	resourcePayload := dto.ResourcePayload{
+		Variables: extractedVars,
+	}
+	if contentType == model.PLAIN_TEXT {
+		resourcePayload.Text = fileText
+	} else {
+		resourcePayload.URL = fmt.Sprintf("s3:///%s", name)
+	}
+
+	templateModel, err := s.mapper.ToTemplate(dto.TemplatePayload{
+		Name:     name,
+		Summary:  summary,
+		Type:     templateType,
+		Content:  contentType,
+		Resource: resourcePayload,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := s.repo.InsertIntoDB(ctx, templateModel)
+	if err != nil {
+		return nil, err
+	}
+	templateModel.ID = id
+
+	if contentType != model.PLAIN_TEXT {
+		if err := s.s3.UploadBytes(ctx, templateModel.ID.Hex(), input, string(templateModel.Content)); err != nil {
+			return nil, err
+		}
+	}
+
+	payload, err := s.mapper.ToPayload(*templateModel)
+	if err != nil {
+		return nil, err
+	}
+
+	return payload, nil
 }

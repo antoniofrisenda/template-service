@@ -9,7 +9,7 @@ import (
 	"github.com/antoniofrisenda/template-service/src/pkg/internal/api/service"
 	awsService "github.com/antoniofrisenda/template-service/src/pkg/internal/api/service/aws"
 	"github.com/antoniofrisenda/template-service/src/pkg/internal/api/v1/router"
-	"github.com/antoniofrisenda/template-service/src/pkg/internal/assets/factory/dto"
+	"github.com/antoniofrisenda/template-service/src/pkg/internal/assets/factory/helper"
 	mongoClient "github.com/antoniofrisenda/template-service/src/pkg/internal/assets/mongo"
 	LogConfig "github.com/antoniofrisenda/template-service/src/pkg/internal/config"
 	"github.com/gofiber/fiber/v3"
@@ -53,7 +53,6 @@ func RegisterExternalRoute(app *fiber.App) {
 }
 
 func RegisterInternalRoute(app *fiber.App, ctx context.Context) {
-
 	client := mongoClient.NewMongoClient(os.Getenv("MONGO_URI"), os.Getenv("MONGO_DB_NAME"))
 	if err := client.Connect(); err != nil {
 		panic(err)
@@ -73,28 +72,26 @@ func RegisterInternalRoute(app *fiber.App, ctx context.Context) {
 		panic(err)
 	}
 
-	controller := router.NewTemplateController(service.NewTemplateService(repository.NewTemplateRepository(client.GetConnection().Collection("templates")), s3Client))
+	templateMapper := helper.NewTemplateMapper(helper.NewRegistry())
+
+	controller := router.NewTemplateController(
+		service.NewTemplateService(
+			s3Client,
+			templateMapper,
+			repository.NewTemplateRepository(client.GetConnection().Collection("templates")),
+			service.NewResolver(),
+		),
+	)
 
 	route := app.Group("/api/internal/templates")
-	route.Post("/v1", controller.Create)
-	route.Post("/s3/upload/v1", func(c fiber.Ctx) error {
-		var b64 dto.S3UploadBase64Payload
-		if err := c.Bind().Body(&b64); err == nil && b64.FileName != "" && b64.Base64Data != "" {
-			return controller.Upload(c, b64.Base64Data, b64.ContentType)
-		}
-
-		var bytesPayload dto.S3UploadBytesPayload
-		if err := c.Bind().Body(&bytesPayload); err == nil && bytesPayload.FileName != "" && len(bytesPayload.Bytes) > 0 {
-			return controller.Upload(c, bytesPayload.Bytes, bytesPayload.ContentType)
-		}
-
-		return fiber.NewError(fiber.StatusBadRequest, "invalid upload payload")
-	})
-
-	route.Get("/:id/v1", controller.Find)
-	route.Get("/s3/download/:key/v1", controller.Download)
-	route.Get("/s3/presigned/:key/v1", controller.PresignedURL)
-
-	route.Patch("/:id/v1", controller.Patch)
-	route.Delete("/:id/v1", controller.Delete)
+	route.Get("/:id/v1", controller.FindTemplate)
+	route.Get("/name/v1", controller.FindTemplateByName)
+	route.Get("/summary/v1", controller.FindTemplateBySummary)
+	route.Get("/s3/:id/download/bytes/v1", controller.DownloadFileByBytes)
+	route.Get("/:id/download/base64/v1", controller.DownloadFileByBase64)
+	route.Get("/:id/download/presigned-url/v1", controller.DownloadFileByPresignedURL)
+	route.Post("/v1", controller.CreateTemplate)
+	route.Post("/s3/upload/v1", controller.UploadFile)
+	route.Patch("/:id/v1", controller.PatchTemplate)
+	route.Delete("/:id/v1", controller.DeleteTemplate)
 }

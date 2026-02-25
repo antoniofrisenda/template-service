@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"io"
 	"strings"
-	"sync"
 	"time"
 
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
@@ -31,11 +30,6 @@ type S3ClientService struct {
 	region    string
 }
 
-var (
-	instance *S3ClientService
-	once     sync.Once
-)
-
 func NewS3ClientService(ctx context.Context, region string, bucket string, access_key string, secret_key string) (IS3ClientService, error) {
 	var cfgOpts []func(*awsConfig.LoadOptions) error
 	cfgOpts = append(cfgOpts, awsConfig.WithRegion(region))
@@ -50,16 +44,12 @@ func NewS3ClientService(ctx context.Context, region string, bucket string, acces
 
 	client := s3.NewFromConfig(cfg)
 
-	once.Do(func() {
-		instance = &S3ClientService{
-			client:    client,
-			presigner: s3.NewPresignClient(client),
-			bucket:    bucket,
-			region:    region,
-		}
-	})
-
-	return instance, nil
+	return &S3ClientService{
+		client:    client,
+		presigner: s3.NewPresignClient(client),
+		bucket:    bucket,
+		region:    region,
+	}, nil
 }
 
 func (s *S3ClientService) GetBucket(ctx context.Context) error {

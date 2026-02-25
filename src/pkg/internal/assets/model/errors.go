@@ -3,12 +3,17 @@ package model
 import "errors"
 
 var (
-	ErrTemplateNotFound        = errors.New("template not found")
-	ErrInvalidTemplateType     = errors.New("invalid template type")
-	ErrInvalidContentType      = errors.New("invalid content type")
-	ErrInvalidResource         = errors.New("invalid resource")
-	ErrStaticCannotHaveVars    = errors.New("static template cannot have variables")
-	ErrStaticCannotUsePlain    = errors.New("static template cannot use plain text")
-	ErrTemplateMustHaveSource  = errors.New("template must have url or text source")
-	ErrTemplateResolveMismatch = errors.New("template variables mismatch")
+	ErrTemplateNotFound = errors.New("TEMPLATE or STATIC file not found")
+	ErrInvalidTemplateType = errors.New("invalid template type")
+	ErrInvalidContentType  = errors.New("invalid content type")
+
+	ErrInvalidField = errors.New("template field has invalid syntax or is empty")
+
+	ErrStaticMustHaveText   = errors.New("static template must contain text")
+	ErrStaticCannotHaveURL  = errors.New("static template cannot contain a URL")
+	ErrStaticCannotHaveVars = errors.New("static template cannot contain variables")
+
+	ErrTemplateMustHaveSource = errors.New("template must contain a valid source (text or URL)")
+	ErrTemplateCannotHaveURL  = errors.New("template with plain text content cannot contain a URL")
+	ErrTemplateCannotHaveText = errors.New("template with non-text content cannot contain inline text")
 )

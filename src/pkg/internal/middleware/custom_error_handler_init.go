@@ -19,18 +19,29 @@ func ErrorHandler(c fiber.Ctx, err error) error {
 		message = fiberErr.Message
 	} else {
 		switch {
-		case errors.Is(err, model.ErrTemplateNotFound), errors.Is(err, mongo.ErrNoDocuments):
+
+		case errors.Is(err, model.ErrTemplateNotFound),
+			errors.Is(err, mongo.ErrNoDocuments):
 			status = fiber.StatusNotFound
+
 		case errors.Is(err, model.ErrInvalidTemplateType),
 			errors.Is(err, model.ErrInvalidContentType),
-			errors.Is(err, model.ErrInvalidResource),
+			errors.Is(err, model.ErrInvalidField),
+			errors.Is(err, model.ErrInvalidField),
+
+			errors.Is(err, model.ErrStaticMustHaveText),
+			errors.Is(err, model.ErrStaticCannotHaveURL),
 			errors.Is(err, model.ErrStaticCannotHaveVars),
-			errors.Is(err, model.ErrStaticCannotUsePlain),
+
 			errors.Is(err, model.ErrTemplateMustHaveSource),
-			errors.Is(err, model.ErrTemplateResolveMismatch):
+			errors.Is(err, model.ErrTemplateCannotHaveURL),
+			errors.Is(err, model.ErrTemplateCannotHaveText):
+
 			status = fiber.StatusBadRequest
 		}
 	}
 
-	return c.Status(status).JSON(fiber.Map{"error": message})
+	return c.Status(status).JSON(fiber.Map{
+		"error": message,
+	})
 }

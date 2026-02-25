@@ -16,7 +16,15 @@ func NewGenericRepository[T any](m *mongo.Collection) *CRUDRepository[T] {
 	return &CRUDRepository[T]{collection: m}
 }
 
-func (repo *CRUDRepository[T]) Create(ctx context.Context, t *T) (primitive.ObjectID, error) {
+func (repo *CRUDRepository[T]) GetByID(ctx context.Context, ID primitive.ObjectID) (*T, error) {
+	var t T
+	if err := repo.collection.FindOne(ctx, bson.M{"_id": ID}).Decode(&t); err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
+
+func (repo *CRUDRepository[T]) CreateEntity(ctx context.Context, t *T) (primitive.ObjectID, error) {
 	query, err := repo.collection.InsertOne(ctx, t)
 	if err != nil {
 		return primitive.NilObjectID, err
@@ -26,14 +34,6 @@ func (repo *CRUDRepository[T]) Create(ctx context.Context, t *T) (primitive.Obje
 		return primitive.NilObjectID, err
 	}
 	return ID, nil
-}
-
-func (repo *CRUDRepository[T]) FindByID(ctx context.Context, ID primitive.ObjectID) (*T, error) {
-	var t T
-	if err := repo.collection.FindOne(ctx, bson.M{"_id": ID}).Decode(&t); err != nil {
-		return nil, err
-	}
-	return &t, nil
 }
 
 func (repo *CRUDRepository[T]) UpdateByID(ctx context.Context, ID primitive.ObjectID, b bson.M) error {

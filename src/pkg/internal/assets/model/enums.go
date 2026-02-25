@@ -10,9 +10,11 @@ const (
 )
 
 const (
-	ISPDF   ContentType = "PDF"
-	ISHTML  ContentType = "HTML"
-	ISPLAIN ContentType = "PLAIN_TEXT"
+	PDF        ContentType = "PDF"
+	HTML       ContentType = "HTML"
+	PLAIN_TEXT ContentType = "PLAIN_TEXT"
+
+	IMAGE ContentType = "IMAGE"
 )
 
 func (t TemplateType) IsValid() bool {
@@ -20,5 +22,5 @@ func (t TemplateType) IsValid() bool {
 }
 
 func (c ContentType) IsValid() bool {
-	return c == ISPDF || c == ISHTML || c == ISPLAIN
+	return c == PDF || c == HTML || c == PLAIN_TEXT || c == IMAGE
 }

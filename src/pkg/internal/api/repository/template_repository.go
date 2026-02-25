@@ -11,11 +11,11 @@ import (
 )
 
 type ITemplateRepository interface {
-	Insert(ctx context.Context, m *model.Template) (primitive.ObjectID, error)
-	FindByID(ctx context.Context, id primitive.ObjectID) (*model.Template, error)
-	FindByName(ctx context.Context, s string) (*model.Template, error)
-	FindBySummary(ctx context.Context, s string) (*model.Template, error)
-	Patch(ctx context.Context, id primitive.ObjectID, update bson.M) error
+	GetByID(ctx context.Context, id primitive.ObjectID) (*model.Template, error)
+	GetByName(ctx context.Context, s string) (*model.Template, error)
+	GetBySummary(ctx context.Context, s string) (*model.Template, error)
+	InsertIntoDB(ctx context.Context, m *model.Template) (primitive.ObjectID, error)
+	UpdateByID(ctx context.Context, id primitive.ObjectID, update bson.M) error
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 }
 
@@ -27,15 +27,11 @@ func NewTemplateRepository(collection *mongo.Collection) ITemplateRepository {
 	return &TemplateRepository{repo: NewGenericRepository[model.Template](collection)}
 }
 
-func (r *TemplateRepository) Insert(ctx context.Context, m *model.Template) (primitive.ObjectID, error) {
-	return r.repo.Create(ctx, m)
+func (r *TemplateRepository) GetByID(ctx context.Context, id primitive.ObjectID) (*model.Template, error) {
+	return r.repo.GetByID(ctx, id)
 }
 
-func (r *TemplateRepository) FindByID(ctx context.Context, id primitive.ObjectID) (*model.Template, error) {
-	return r.repo.FindByID(ctx, id)
-}
-
-func (r *TemplateRepository) FindByName(ctx context.Context, s string) (*model.Template, error) {
+func (r *TemplateRepository) GetByName(ctx context.Context, s string) (*model.Template, error) {
 	var t model.Template
 	if err := r.repo.collection.FindOne(ctx, bson.M{"name": s}).Decode(&t); err != nil {
 		return nil, err
@@ -43,16 +39,20 @@ func (r *TemplateRepository) FindByName(ctx context.Context, s string) (*model.T
 	return &t, nil
 }
 
-func (r *TemplateRepository) FindBySummary(ctx context.Context, s string) (*model.Template, error) {
+func (r *TemplateRepository) GetBySummary(ctx context.Context, f string) (*model.Template, error) {
 	var t model.Template
-	filter := bson.M{"summary": bson.M{"$regex": s, "$options": "i"}}
+	filter := bson.M{"summary": bson.M{"$regex": f, "$options": "i"}}
 	if err := r.repo.collection.FindOne(ctx, filter).Decode(&t); err != nil {
 		return nil, err
 	}
 	return &t, nil
 }
 
-func (r *TemplateRepository) Patch(ctx context.Context, id primitive.ObjectID, update bson.M) error {
+func (r *TemplateRepository) InsertIntoDB(ctx context.Context, m *model.Template) (primitive.ObjectID, error) {
+	return r.repo.CreateEntity(ctx, m)
+}
+
+func (r *TemplateRepository) UpdateByID(ctx context.Context, id primitive.ObjectID, update bson.M) error {
 	return r.repo.UpdateByID(ctx, id, update)
 }
 

@@ -2,7 +2,7 @@ package dto
 
 import "github.com/antoniofrisenda/template-service/src/pkg/internal/assets/model"
 
-type TemplatetPayload struct {
+type TemplatePayload struct {
 	Name     string             `json:"name"`
 	Summary  string             `json:"summary"`
 	Type     model.TemplateType `json:"type"`
@@ -18,16 +18,4 @@ type ResourcePayload struct {
 
 type ResolvePayload struct {
 	Variables map[string]string `json:"variables"`
-}
-
-type S3UploadBase64Payload struct {
-	FileName    string `json:"fileName"`
-	ContentType string `json:"contentType"`
-	Base64Data  string `json:"base64Data"`
-}
-
-type S3UploadBytesPayload struct {
-	FileName    string `json:"fileName"`
-	ContentType string `json:"contentType"`
-	Bytes       []byte `json:"bytes"`
 }
