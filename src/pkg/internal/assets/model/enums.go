@@ -1,12 +1,12 @@
 package model
 
-type TemplateType string
+type DocumentType string
 type ContentType string
 type Source string
 
 const (
-	STATIC   TemplateType = "STATIC"
-	TEMPLATE TemplateType = "TEMPLATE"
+	STATIC   DocumentType = "STATIC"
+	TEMPLATE DocumentType = "TEMPLATE"
 )
 
 const (

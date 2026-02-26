@@ -8,7 +8,7 @@ type Document struct {
 	Name    string `bson:"name"`
 	Summary string `bson:"summary,omitempty"`
 
-	Type    TemplateType `bson:"type"`
+	Type    DocumentType `bson:"type"`
 	Source  Source       `bson:"source"`
 	Content ContentType  `bson:"content"`
 
