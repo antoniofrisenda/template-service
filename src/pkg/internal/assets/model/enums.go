@@ -1,19 +1,23 @@
 package model
 
-type TemplateType string
-
+type DocumentType string
 type ContentType string
+type Source string
 
 const (
-	STATIC   TemplateType = "STATIC"
-	TEMPLATE TemplateType = "TEMPLATE"
+	STATIC   DocumentType = "STATIC"
+	TEMPLATE DocumentType = "TEMPLATE"
+)
+
+const (
+	S3_PRIVATE_BUCKET Source = "S3_PRIVATE_BUCKET"
+	HARDCODED_VALUE Source = "HARDCODED_VALUE"
 )
 
 const (
 	PDF        ContentType = "PDF"
 	HTML       ContentType = "HTML"
 	PLAIN_TEXT ContentType = "PLAIN_TEXT"
-
 	IMAGE ContentType = "IMAGE"
 )
 
