@@ -1,19 +1,44 @@
-.env
-
+# Binaries
 *.exe
+*.exe~
 *.dll
 *.so
 *.dylib
 
+# Test binaries & coverage
 *.test
-
 *.out
+*.coverprofile
+coverage.out
 
-.idea/
-.vscode/
+# Build output
+bin/
+dist/
+tmp/
 
+# Go workspace
+go.sum
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
 *.log
 
+# IDE / Editor
+.idea/
+.vscode/
+.cursor/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local data / volumes
 data/
 mongodb_data/
 mongodb_config/

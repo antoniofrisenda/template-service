@@ -1,20 +1,20 @@
-FROM golang:1.25-alpine AS Go
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
+COPY src ./src
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -o app ./src/cmd/app
+    go build -ldflags="-s -w" -o app ./src/cmd/app
 
 FROM scratch
 
 WORKDIR /app
 
-COPY --from=Go /app/app .
+COPY --from=builder /app/app .
 
 EXPOSE 3000
 

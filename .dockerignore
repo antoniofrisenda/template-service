@@ -1,13 +1,37 @@
+# VCS
 .git
 .gitignore
-.env
-Dockerfile
-docker-compose.yml
-README.md
-*.md
-.vscode
-.idea
+.github/
+
+# IDE
+.vscode/
+.cursor/
+.idea/
+*.code-workspace
+
+# OS
+.DS_Store
+
+# Logs
 *.log
-data/
-mongodb_data/
-mongodb_config/
+*.out
+
+# Coverage & test artifacts
+*.test
+*.coverprofile
+coverage.out
+
+# Test files
+**/*_test.go
+
+# Build artifacts locali
+bin/
+dist/
+tmp/
+
+# Environment
+.env
+.env.*
+
+# Docker files non necessari
+docker-compose*.yml
