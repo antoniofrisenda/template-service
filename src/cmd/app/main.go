@@ -4,17 +4,23 @@ import (
 	"log"
 
 	"github.com/antoniofrisenda/template-service/src/internal/api"
+	"github.com/antoniofrisenda/template-service/src/internal/config"
 
 	"github.com/gofiber/fiber/v3"
 )
 
 func main() {
-	app, err := api.Init()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	app, err := api.Init(cfg)
 	if err != nil {
 		panic(err)
 	}
 
-	log.Fatal(app.Listen(":3000", fiber.ListenConfig{
+	log.Fatal(app.Listen(":"+cfg.App.Port, fiber.ListenConfig{
 		DisableStartupMessage: true,
 	}))
 }

@@ -44,12 +44,13 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    depends_on:
+    links:
       - mongo
       - localstack
     ports:
       - ${PORT}:${PORT}
     environment:
+      PORT: ${PORT}
       DB: ${DBNAME}
       MONGO_URL: ${MONGO_URL}
       AWS_ENDPOINT_URL: ${AWS_ENDPOINT_URL}

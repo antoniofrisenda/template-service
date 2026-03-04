@@ -6,24 +6,18 @@ import (
 
 	AWS "github.com/antoniofrisenda/template-service/src/clients/aws"
 	MONGO "github.com/antoniofrisenda/template-service/src/clients/mongo"
-	"github.com/antoniofrisenda/template-service/src/internal/api/v1/router"
+	"github.com/antoniofrisenda/template-service/src/internal/api/router"
 	"github.com/antoniofrisenda/template-service/src/internal/assets/helpers"
 	"github.com/antoniofrisenda/template-service/src/internal/config"
 	"github.com/antoniofrisenda/template-service/src/internal/repository"
 	"github.com/antoniofrisenda/template-service/src/internal/service"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
-	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
 )
 
-func Init() (*fiber.App, error) {
-	cfg, err := config.Load()
-	if err != nil {
-		return nil, err
-	}
-
+func Init(cfg *config.Config) (*fiber.App, error) {
 	app := fiber.New(fiber.Config{
 		JSONEncoder: json.Marshal,
 		JSONDecoder: json.Unmarshal,
@@ -33,11 +27,7 @@ func Init() (*fiber.App, error) {
 		EnableStackTrace: true,
 	}))
 
-	app.Use(logger.New(logger.Config{
-		Format:     "[${time}] ${status} - ${method} ${path} ${latency}\n",
-		TimeFormat: "2006-01-02 15:04:05",
-		TimeZone:   "Local",
-	}))
+	app.Use(cfg.Logger.NewFiberLogger())
 
 	app.Use(requestid.New())
 
@@ -45,7 +35,7 @@ func Init() (*fiber.App, error) {
 
 	ctx := context.Background()
 
-	err = RegisterInternalRoute(ctx, cfg, app)
+	err := RegisterInternalRoute(ctx, cfg, app)
 	if err != nil {
 		return nil, err
 	}
@@ -80,12 +70,6 @@ func RegisterInternalRoute(ctx context.Context, cfg *config.Config, app *fiber.A
 	}
 
 	repo := repository.NewDocumentRepository(mongoClient.GetDB().Collection("templates"))
-
-	if err := repo.EnsureIndexes(ctx); err != nil {
-		log.Warnf("Failed to create DB indexes: %v", err)
-	} else {
-		log.Info("DB indexes OK!")
-	}
 
 	s3, err := AWS.NewS3ClientService(
 		ctx,

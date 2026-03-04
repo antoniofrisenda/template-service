@@ -8,7 +8,7 @@ export PORT=3000
 export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test
 export AWS_DEFAULT_REGION=us-east-1
-export AWS_S3_BUCKET_NAME=templates-bucket
+export AWS_S3_BUCKET_NAME=document-bucket
 export AWS_ENDPOINT_URL=http://localstack:4566
 
 export USERNAME=root
@@ -30,6 +30,3 @@ ps:
 
 logs:
 	@docker compose -f ./docker-compose.yml logs -f
-
-clean:
-	@docker compose -f ./docker-compose.yml down -v --rmi all

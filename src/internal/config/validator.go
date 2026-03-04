@@ -12,7 +12,7 @@ type Validator interface {
 	Validate() error
 }
 
-func ValidateDocument(d *dto.InsertDocument) error {
+func Validate(d *dto.InsertDocument) error {
 	if d == nil {
 		return fmt.Errorf("document is nil")
 	}
