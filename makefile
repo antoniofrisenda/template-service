@@ -17,7 +17,7 @@ endif
 #export MONGO_URI=mongodb://${USERNAME}:${PASSWORD}@mongo:27017/?authSource=admin&w=majority
 #export MONGO_URL=mongodb://${USERNAME}:${PASSWORD}@mongo:27017/${DBNAME}?authSource=admin&w=majority
 
-.PHONY: up down ps logs clean
+.PHONY: up down ps logs
 
 up:
 	@docker compose -f ./docker-compose.yml up --build -d
@@ -29,4 +29,4 @@ ps:
 	@docker compose -f ./docker-compose.yml ps -a
 
 logs:
-	@docker compose -f ./docker-compose.yml logs -f
+	@docker compose -f ./docker-compose.yml logs -f document-service --tail=100
