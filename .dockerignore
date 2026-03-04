@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+Dockerfile
+docker-compose.yml
+README.md
+*.md
+.vscode
+.idea
+*.log
+data/
+mongodb_data/
+mongodb_config/
