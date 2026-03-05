@@ -1,10 +1,12 @@
 FROM golang:1.26-alpine AS builder
 
-RUN go mod tidy
-
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY go.mod
+
+RUN go mod tidy
+
+COPY go.sum ./
 RUN go mod download
 
 COPY . .
