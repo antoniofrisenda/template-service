@@ -25,7 +25,6 @@ coverage.out
 **/*_test.go
 
 # Build artifacts locali
-bin/
 dist/
 tmp/
 
