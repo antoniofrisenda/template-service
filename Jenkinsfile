@@ -49,7 +49,7 @@ pipeline {
 
     post {
         always {
-            node {
+            script {
                 echo "Cleanup containers with docker-compose"
                 sh '''
                 docker run --rm -v "$PWD:/app" -w /app -v /var/run/docker.sock:/var/run/docker.sock docker/compose:2.20.2 sh -c '
