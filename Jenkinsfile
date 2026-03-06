@@ -1,43 +1,26 @@
 pipeline {
-  agent none
+    agent any
 
-  stages {
-
-    stage('Build Go Binary') {
-      agent { label 'go' } // nodo con Go
-      steps {
-        sh '''
-        go mod tidy
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o app ./src/cmd/app
-        '''
-      }
+    options {
+        timeout(time: 10, unit: 'MINUTES')
     }
 
-    stage('Docker Compose') {
-      agent { label 'docker' } // nodo con Docker
-      steps {
-        sh '''
-        docker-compose build
-        docker-compose up -d
-        '''
-      }
+    tools {
+        go 'go-1.26'
     }
 
-    stage('Integration Tests') {
-      agent { label 'go' } // nodo con Go
-      steps {
-        sh 'go test ./...'
-      }
+    environment {
+        IMAGE_NAME = "document-service:latest"
+        CONTAINER_NAME = "document-service"
+        GO111MODULE = 'on'
     }
 
-  }
-
-  post {
-    always {
-      agent { label 'docker' } // nodo con Docker
-      steps {
-        sh 'docker-compose down'
-      }
+    post {
+        success {
+            echo 'Pipeline terminata.'
+        }
+        failure {
+            echo 'Pipeline fallita.'
+        }
     }
-  }
 }
