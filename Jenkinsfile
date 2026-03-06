@@ -5,30 +5,52 @@ pipeline {
         timeout(time: 10, unit: 'MINUTES')
     }
 
-    tools {
-        go 'go-1.26'
-    }
-
     environment {
         GO111MODULE = 'on'
     }
 
     stages {
-        stage('Build Go') {
+
+        stage('Checkout SCM') {
             steps {
-                sh '''
-                    rm -f document-service
-                    go mod tidy
-                    go build -o document-service
-                '''
+                checkout scm
             }
         }
 
-        stage('Deploy') {
+        stage('List Workspace (Debug)') {
+            steps {
+                sh 'pwd && ls -R'
+            }
+        }
+
+        stage('Build Go Binary') {
+            steps {
+                // Cambia 'cmd/document-service' con la cartella reale dei tuoi file .go
+                dir('cmd/document-service') {
+                    sh '''
+                        echo "Cleaning old binary..."
+                        rm -f ../../../document-service
+
+                        echo "Tidying modules..."
+                        go mod tidy
+
+                        echo "Building Go binary..."
+                        go build -o ../../../document-service
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
             steps {
                 sh '''
+                    echo "Stopping old containers..."
                     docker-compose down || true
+
+                    echo "Building Docker images..."
                     docker-compose build
+
+                    echo "Starting containers..."
                     docker-compose up -d
                 '''
             }
@@ -37,7 +59,7 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline terminata.'
+            echo 'Pipeline terminata con successo.'
         }
         failure {
             echo 'Pipeline fallita.'
