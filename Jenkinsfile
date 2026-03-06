@@ -7,41 +7,38 @@ pipeline {
     }
 
     stages {
-        stage('Build Go & Docker Image') {
+
+        stage('Build Go Binary') {
             agent {
-                docker {
+                dockerContainer {
                     image 'golang:1.26-alpine'
                     args '-v $HOME/.cache/go-build:/go/pkg/mod/cache'
                 }
             }
             steps {
-                script {
-                    sh 'rm -f app'
-                    sh 'go mod tidy'
-                    sh 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o app ./src/cmd/app'
-                    sh 'cp app .'
-                }
+                sh 'rm -f app'
+                sh 'go mod tidy'
+                sh 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o app ./src/cmd/app'
+                sh 'cp app .'
             }
         }
 
-        stage('Build Docker Compose') {
+        stage('Build & Start Services with Docker Compose') {
             agent {
-                docker {
+                dockerContainer {
                     image 'docker/compose:2.20.2'
                     args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
-                script {
-                    sh 'docker-compose build'
-                    sh 'docker-compose up -d'
-                }
+                sh 'docker-compose build'
+                sh 'docker-compose up -d'
             }
         }
 
         stage('Integration Tests') {
             agent {
-                docker {
+                dockerContainer {
                     image 'golang:1.26-alpine'
                     args '-v $HOME/.cache/go-build:/go/pkg/mod/cache'
                 }
@@ -54,7 +51,15 @@ pipeline {
 
     post {
         always {
-            echo "Pipeline terminata"
+            agent {
+                dockerContainer {
+                    image 'docker/compose:2.20.2'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                echo "Pipeline terminata"
+            }
         }
     }
 }
