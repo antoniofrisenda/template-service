@@ -11,9 +11,9 @@ pipeline {
         stage('Build Go Binary') {
             agent any
             steps {
-                echo "Build Go Binary inside a container"
+                echo "Build Go Binary inside golang:1.26-alpine container"
                 sh '''
-                docker run --rm -v $PWD:/app -w /app golang:1.26-alpine sh -c '
+                docker run --rm -v "$PWD:/app" -w /app golang:1.26-alpine sh -c '
                     go mod tidy
                     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o app ./src/cmd/app
                 '
@@ -24,9 +24,9 @@ pipeline {
         stage('Build & Start Services with Docker Compose') {
             agent any
             steps {
-                echo "Build and launch containers with Docker Compose"
+                echo "Build Docker image and launch all services via docker-compose"
                 sh '''
-                docker run --rm -v $PWD:/app -w /app -v /var/run/docker.sock:/var/run/docker.sock docker/compose:2.20.2 sh -c '
+                docker run --rm -v "$PWD:/app" -w /app -v /var/run/docker.sock:/var/run/docker.sock docker/compose:2.20.2 sh -c '
                     docker-compose build
                     docker-compose up -d
                 '
@@ -37,9 +37,9 @@ pipeline {
         stage('Integration Tests') {
             agent any
             steps {
-                echo "Run integration tests inside Go container"
+                echo "Run integration tests inside golang:1.26-alpine container"
                 sh '''
-                docker run --rm -v $PWD:/app -w /app golang:1.26-alpine sh -c '
+                docker run --rm -v "$PWD:/app" -w /app golang:1.26-alpine sh -c '
                     go test ./...
                 '
                 '''
@@ -49,12 +49,14 @@ pipeline {
 
     post {
         always {
-            echo "Cleanup containers"
-            sh '''
-            docker run --rm -v $PWD:/app -w /app -v /var/run/docker.sock:/var/run/docker.sock docker/compose:2.20.2 sh -c '
-                docker-compose down
-            '
-            '''
+            node {
+                echo "Cleanup containers with docker-compose"
+                sh '''
+                docker run --rm -v "$PWD:/app" -w /app -v /var/run/docker.sock:/var/run/docker.sock docker/compose:2.20.2 sh -c '
+                    docker-compose down
+                '
+                '''
+            }
         }
     }
 }
