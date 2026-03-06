@@ -1,6 +1,7 @@
 # VCS
 .git
 .gitignore
+.gitattributes
 .github/
 
 # IDE
