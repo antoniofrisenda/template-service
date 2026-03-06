@@ -14,7 +14,6 @@ pipeline {
     }
 
     stages {
-
         stage('Build Go') {
             steps {
                 sh '''
