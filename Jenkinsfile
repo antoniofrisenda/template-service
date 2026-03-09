@@ -22,22 +22,23 @@ pipeline {
         stage('Build Docker Image') {
             agent { label 'docker' }
             steps {
-                sh 'docker compose -f ./docker-compose.yml up --build -d'
+                sh 'docker build -t document-service .'
             }
         }
 
         stage('Run Services') {
             agent { label 'docker' }
             steps {
-                sh 'docker-compose down -v' /
+                sh 'docker-compose down -v'
                 sh 'docker-compose up -d'
             }
         }
-    }
+
+    } // fine stages
 
     post {
         always {
             echo 'Pipeline completata.'
         }
     }
-}
+} // fine pipeline
