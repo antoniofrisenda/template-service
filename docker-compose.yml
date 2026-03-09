@@ -9,11 +9,7 @@ services:
       DEBUG: "1"
       SERVICES: "s3"
     volumes:
-      - ${PWD}/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
-    healthcheck:
-      test: ["CMD", "awslocal", "s3", "ls", "document-bucket"]
-      interval: 5s
-      retries: 12
+      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
     networks:
       - jenkins-app-net
 
