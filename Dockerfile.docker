@@ -9,7 +9,7 @@ WORKDIR /home/jenkins
 CMD curl -sO http://host.docker.internal:8080/jnlpJars/agent.jar && \
     java -jar agent.jar \
     -url http://host.docker.internal:8080/ \
-    -secret f4c44e086d59188a937dfbf77ae72cdb924e3da9b5f4cdc767ea98b3677e7983 \
+    -secret f9c920548f870c737e07634460719649ee69543504b75abac24b2de7b64f2caa \
     -name "docker-agent" \
     -webSocket \
     -workDir "/home/jenkins/agent"
