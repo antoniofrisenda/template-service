@@ -4,9 +4,9 @@ RUN apt-get update && \
     apt-get install -y curl default-jre && \
     rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /home/jenkins/agent
+RUN mkdir -p /var/jenkins
 
-WORKDIR /home/jenkins
+WORKDIR /var/jenkins
 
 CMD curl -sO http://jenkins:8080/jnlpJars/agent.jar && \
     java -jar agent.jar \
@@ -14,4 +14,4 @@ CMD curl -sO http://jenkins:8080/jnlpJars/agent.jar && \
     -secret 160628eb86fca6fb9c33b5570733de32cfa2730a3f5cf85b29f8a5e2c4451f9c \
     -name "agent-golang" \
     -webSocket \
-    -workDir "/home/jenkins/agent"
+    -workDir "/var/jenkins"

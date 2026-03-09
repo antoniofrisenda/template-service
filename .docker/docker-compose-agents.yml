@@ -15,7 +15,7 @@ services:
       dockerfile: golang.Dockerfile
     container_name: jenkins-agent-golang
     volumes:
-      - /home/jenkins/agent:/home/jenkins/agent
+      - jenkins_agent_golang:/var/jenkins
     depends_on:
       - jenkins
 
@@ -25,10 +25,12 @@ services:
       dockerfile: docker.Dockerfile
     container_name: jenkins-agent-docker
     volumes:
-      - /home/jenkins/agent:/home/jenkins/agent
+      - jenkins_agent_docker:/var/jenkins
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - jenkins
 
 volumes:
   jenkins_home:
+  jenkins_agent_golang:
+  jenkins_agent_docker:
