@@ -11,11 +11,7 @@ services:
     environment:
       DEBUG: "1"
       SERVICES: "sns,sqs,s3"
-    entrypoint:
-      - sh
-      - -c
-      - |
-        chmod +x /etc/localstack/init/ready.d/init-aws.sh && \ /usr/bin/localstack start
+    entrypoint: [ "sh", "-c", "chmod +x /etc/localstack/init/ready.d/init-aws.sh && /usr/local/bin/localstack start" ]
 
   mongo:
     container_name: mongo
