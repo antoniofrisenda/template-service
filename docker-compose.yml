@@ -6,7 +6,7 @@ services:
     ports:
       - "4566:4566"
     volumes:
-      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh:ro
     environment:
       DEBUG: "1"
       SERVICES: "s3"
