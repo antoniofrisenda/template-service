@@ -1,15 +1,19 @@
 services:
   localstack:
     container_name: localstack
-    image: localstack/localstack:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.localstack
     restart: always
     ports:
       - "4566:4566"
-    volumes:
-      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh:ro
     environment:
       DEBUG: "1"
       SERVICES: "s3"
+    healthcheck:
+      test: ["CMD", "awslocal", "s3", "ls", "document-bucket"]
+      interval: 5s
+      retries: 12
 
   mongo:
     container_name: mongo
