@@ -34,11 +34,11 @@ pipeline {
             }
         }
 
-    } // fine stages
+    } 
 
     post {
         always {
             echo 'Pipeline completata.'
         }
     }
-} // fine pipeline
+} 
