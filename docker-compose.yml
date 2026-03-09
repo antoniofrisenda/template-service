@@ -9,8 +9,7 @@ services:
       DEBUG: "1"
       SERVICES: "s3"
     volumes:
-      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
     healthcheck:
       test: ["CMD", "awslocal", "s3", "ls", "document-bucket"]
       interval: 5s
