@@ -44,7 +44,7 @@ services:
       context: ..
       dockerfile: .docker/service.Dockerfile
     restart: always
-    links:
+    depends_on:
       - mongo
       - localstack
     ports:
