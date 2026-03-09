@@ -26,7 +26,7 @@ services:
   agent-docker:
     build:
       context: .
-      dockerfile: docker.Dockerfile
+      dockerfile: .docker/docker.Dockerfile
     container_name: jenkins-agent-docker
     volumes:
       - /home/jenkins/agent:/home/jenkins/agent
