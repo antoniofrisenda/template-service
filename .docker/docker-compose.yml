@@ -48,7 +48,7 @@ services:
     container_name: document-service
     build:
       context: ..
-      dockerfile: service.Dockerfile
+      dockerfile: .docker/service.Dockerfile
     restart: always
     links:
       - mongo
