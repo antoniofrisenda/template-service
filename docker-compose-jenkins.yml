@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.jenkins
     container_name: jenkins
     ports:
-      - "8080:8080"
+      - "8080:8080"   
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
@@ -17,6 +17,8 @@ services:
       context: .
       dockerfile: Dockerfile.golang
     container_name: jenkins-agent-golang
+    volumes:
+      - /home/jenkins/agent:/home/jenkins/agent
     depends_on:
       - jenkins
 
@@ -25,6 +27,9 @@ services:
       context: .
       dockerfile: Dockerfile.docker
     container_name: jenkins-agent-docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/jenkins/agent:/home/jenkins/agent
     depends_on:
       - jenkins
 
