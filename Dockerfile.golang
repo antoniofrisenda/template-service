@@ -1,0 +1,17 @@
+FROM golang:latest
+
+RUN apt-get update && \
+    apt-get install -y curl default-jre && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /home/jenkins/agent
+
+WORKDIR /home/jenkins
+
+CMD curl -sO http://host.docker.internal:8080/jnlpJars/agent.jar && \
+    java -jar agent.jar \
+    -url http://host.docker.internal:8080/ \
+    -secret 816fd2b5b35f25383cba22645f2489edbe05bddd880298031ab15f232e03acd6 \
+    -name "golang-agent" \
+    -webSocket \
+    -workDir "/home/jenkins/agent"

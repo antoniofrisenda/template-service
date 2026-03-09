@@ -5,6 +5,9 @@ endif
 
 .PHONY: up down ps logs
 
+up-0:
+	@docker compose -f ./docker-compose-jenkins.yml up --build -d
+
 up:
 	@docker compose -f ./docker-compose.yml up --build -d
 	

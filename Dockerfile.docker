@@ -1,0 +1,15 @@
+FROM docker:latest
+
+RUN apk add --no-cache curl openjdk17-jre
+
+RUN mkdir -p /home/jenkins/agent
+
+WORKDIR /home/jenkins
+
+CMD curl -sO http://host.docker.internal:8080/jnlpJars/agent.jar && \
+    java -jar agent.jar \
+    -url http://host.docker.internal:8080/ \
+    -secret f4c44e086d59188a937dfbf77ae72cdb924e3da9b5f4cdc767ea98b3677e7983 \
+    -name "docker-agent" \
+    -webSocket \
+    -workDir "/home/jenkins/agent"

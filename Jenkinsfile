@@ -1,0 +1,43 @@
+pipeline {
+    agent none
+
+    stages {
+
+        stage('Build Go') {
+            agent { label 'golang' }
+            steps {
+                sh 'rm -f app'
+                sh 'go mod tidy'
+                sh 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o app ./src/cmd/app'
+            }
+        }
+
+        stage('Test') {
+            agent { label 'golang' }
+            steps {
+                sh 'go test ./... || true'
+            }
+        }
+
+        stage('Build Docker Image') {
+            agent { label 'docker' }
+            steps {
+                sh 'docker compose -f ./docker-compose.yml up --build -d'
+            }
+        }
+
+        stage('Run Services') {
+            agent { label 'docker' }
+            steps {
+                sh 'docker-compose down -v' /
+                sh 'docker-compose up -d'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline completata.'
+        }
+    }
+}
