@@ -29,8 +29,8 @@ pipeline {
         stage('Run Services') {
             agent { label 'docker' }
             steps {
-                sh 'docker-compose down -v'
-                sh 'docker-compose up -d'
+                sh 'docker-compose -f .docker/docker-compose.yml down -v'
+                sh 'docker-compose -f .docker/docker-compose.yml up -d'
             }
         }
 
