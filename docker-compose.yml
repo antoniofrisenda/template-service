@@ -1,6 +1,7 @@
 services:
   localstack:
     container_name: localstack
+    image: localstack/localstack:latest
     restart: always
     ports:
       - "4566:4566"
