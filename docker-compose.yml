@@ -1,19 +1,21 @@
 services:
   localstack:
     container_name: localstack
-    build:
-      context: .
-      dockerfile: Dockerfile.localstack
     restart: always
     ports:
       - "4566:4566"
     environment:
       DEBUG: "1"
       SERVICES: "s3"
+    volumes:
+      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       test: ["CMD", "awslocal", "s3", "ls", "document-bucket"]
       interval: 5s
       retries: 12
+    networks:
+      - jenkins-app-net
 
   mongo:
     container_name: mongo
@@ -27,6 +29,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: pass
+    networks:
+      - jenkins-app-net
 
   mongo-express:
     container_name: mongo-express
@@ -41,12 +45,14 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: pass
       ME_CONFIG_MONGODB_URL: mongodb://root:pass@mongo:27017/?authSource=admin&w=majority
       ME_CONFIG_BASICAUTH: "false"
+    networks:
+      - jenkins-app-net
 
   app:
     container_name: document-service
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: service.Dockerfile
     restart: always
     links:
       - mongo
@@ -62,7 +68,13 @@ services:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       AWS_S3_BUCKET_NAME: document-bucket
+    networks:
+      - jenkins-app-net
 
 volumes:
   mongodb_data:
   mongodb_config:
+
+networks:
+  jenkins-app-net:
+    external: true

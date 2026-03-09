@@ -8,9 +8,9 @@ RUN mkdir -p /home/jenkins/agent
 
 WORKDIR /home/jenkins
 
-CMD curl -sO http://host.docker.internal:8080/jnlpJars/agent.jar && \
+CMD curl -sO http://jenkins:8080/jnlpJars/agent.jar && \
     java -jar agent.jar \
-    -url http://host.docker.internal:8080/ \
+    -url http://jenkins:8080/ \
     -secret b7f01542b2fcdadc9720423139c6bb229743dee7f72eee37c4ba49335b370c09 \
     -name "golang-agent" \
     -webSocket \

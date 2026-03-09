@@ -2,36 +2,43 @@ services:
   jenkins:
     image: jenkins/jenkins:lts
     restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile.jenkins
     container_name: jenkins
     ports:
-      - "8080:8080"   
+      - "8080:8080"
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
+    networks:
+      - jenkins-app-net
 
   agent-golang:
     build:
       context: .
-      dockerfile: Dockerfile.golang
+      dockerfile: golang.Dockerfile
     container_name: jenkins-agent-golang
     volumes:
       - /home/jenkins/agent:/home/jenkins/agent
     depends_on:
       - jenkins
+    networks:
+      - jenkins-app-net
 
   agent-docker:
     build:
       context: .
-      dockerfile: Dockerfile.docker
+      dockerfile: docker.Dockerfile
     container_name: jenkins-agent-docker
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - /home/jenkins/agent:/home/jenkins/agent
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - jenkins
+    networks:
+      - jenkins-app-net
 
 volumes:
   jenkins_home:
+
+networks:
+  jenkins-app-net:
+    external: true
