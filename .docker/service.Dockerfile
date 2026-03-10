@@ -10,6 +10,8 @@ RUN go mod tidy
 
 COPY . .
 
+RUN ls -R /app
+
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -ldflags="-s -w" -o app ./src/cmd/app
 
