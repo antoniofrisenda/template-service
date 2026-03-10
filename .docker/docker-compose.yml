@@ -1,15 +1,17 @@
 services:
   localstack:
     container_name: localstack
-    image: localstack/localstack:latest
+    build:
+      context: ..       
+      dockerfile: .docker/localstack.Dockerfile
     restart: always
     ports:
-      - "4566:4566"
+      - "4566:4566"    
     environment:
       DEBUG: "1"
-      SERVICES: "s3"
+      SERVICES: "s3,dynamodb,lambda"
     volumes:
-      - ../init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - localstack_data:/tmp/localstack/data
 
   mongo:
     container_name: mongo
@@ -62,3 +64,4 @@ services:
 volumes:
   mongodb_data:
   mongodb_config:
+  localstack_data:
