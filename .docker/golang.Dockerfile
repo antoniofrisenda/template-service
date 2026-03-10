@@ -1,7 +1,7 @@
 FROM golang:latest
 
 RUN apt-get update && \
-    apt-get install -y curl default-jre && \
+    apt-get install -y curl default-jre docker.io && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /var/jenkins

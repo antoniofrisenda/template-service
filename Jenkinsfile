@@ -15,7 +15,7 @@ pipeline {
         stage('Test Kubectl') {
             agent { label 'k8s' }
             steps {
-                sh 'kubectl'
+                sh 'kubectl cluster-info'
             }
         }
 
