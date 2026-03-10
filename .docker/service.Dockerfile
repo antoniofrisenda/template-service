@@ -8,9 +8,7 @@ WORKDIR /app
 # Copia solo go.mod, senza go.sum
 COPY go.mod ./
 
-# Risolve le dipendenze direttamente durante il build
-RUN go mod tidy
-RUN go mod download
+RUN go mod tidy -v
 
 # Copia tutto il codice
 COPY . .
