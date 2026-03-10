@@ -2,6 +2,14 @@ pipeline {
     agent none
 
     stages {
+        stage('Test Kubectl') {
+            agent { label 'k8s' }
+            steps {
+                sh '''
+                    kubectl --context=docker-desktop cluster-info
+                '''
+            }
+        }
 
         stage('Build Go') {
             agent { label 'golang' }
@@ -9,16 +17,6 @@ pipeline {
                 sh 'rm -f app'
                 sh 'go mod download'
                 sh 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o app ./src/cmd/app'
-            }
-        }
-
-
-        stage('Test Kubectl') {
-            agent { label 'k8s' }
-            steps {
-                sh '''
-                    kubectl --context=kind-kind cluster-info
-                '''
             }
         }
 
