@@ -1,0 +1,7 @@
+.git/
+.gitignore
+.gitattributes
+
+*_test.go
+
+docker-compose*.yml

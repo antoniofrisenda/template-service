@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: agent-k8s
+spec:
+  containers:
+  - name: jenkins-agent
+    image: jenkins/inbound-agent:latest
+    env:
+      - JENKINS_URL=http://jenkins:8080
+      - JENKINS_AGENT_NAME=agent-k8s
+      - JENKINS_SECRET=8580370ce0f0cac4d033e1afb4fb0eea824b29bd87c6ed54435ca6c77ddeab19
+      - JENKINS_WEB_SOCKET=true
+    #args:
+    #  - "-url"
+    #  - "http://jenkins:8080"
+    #  - "-secret"
+    #  - "8580370ce0f0cac4d033e1afb4fb0eea824b29bd87c6ed54435ca6c77ddeab19"
+    #  - "-name"
+    #  - "agent-k8s"
+    #  - "-workDir"
+    #  - "/var/jenkins"
+
+    volumeMounts:
+      - name: agent-workdir
+        mountPath: /var/jenkins
+
+  volumes:
+    - name: agent-workdir
+      emptyDir: {}

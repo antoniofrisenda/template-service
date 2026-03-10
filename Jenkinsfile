@@ -34,6 +34,13 @@ pipeline {
             }
         }
 
+        stage('Test Kubectl') {
+            agent { label 'k8s' }
+            steps {
+                sh 'kubectl'
+            }
+        }
+
     } 
 
     post {
