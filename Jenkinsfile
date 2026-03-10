@@ -6,7 +6,7 @@ pipeline {
             agent { label 'k8s' }
             steps {
                 sh '''
-                    kubectl --context=kind-jenkins-test cluster-info
+                    kubectl --context=docker-desktop cluster-info
                 '''
             }
         }
