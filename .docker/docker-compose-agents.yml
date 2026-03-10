@@ -38,7 +38,8 @@ services:
     container_name: jenkins-agent-kubectl
     volumes:
       - jenkins-agent-kubectl:/var/jenkins
-      - /mnt/c/Users/andre/.kube/config:/home/jenkins/.kube/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      #- /mnt/c/Users/andre/.kube/config:/home/jenkins/.kube/config:ro
     environment:
       - JENKINS_URL=http://jenkins:8080
       - JENKINS_AGENT_NAME=agent-k8s

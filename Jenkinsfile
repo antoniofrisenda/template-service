@@ -12,10 +12,13 @@ pipeline {
             }
         }
 
+
         stage('Test Kubectl') {
             agent { label 'k8s' }
             steps {
-                sh 'kubectl cluster-info'
+                sh '''
+                    kubectl --context=kind-kind cluster-info
+                '''
             }
         }
 
