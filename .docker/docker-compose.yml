@@ -9,8 +9,8 @@ services:
       DEBUG: "1"
       SERVICES: "s3"
     volumes:
-      - ../init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
-    command: sh -c "chmod +x /etc/localstack/init/ready.d/init-aws.sh && localstack start"
+    - ../init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+    - /var/run/docker.sock:/var/run/docker.sock 
 
   mongo:
     container_name: mongo

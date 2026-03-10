@@ -11,15 +11,6 @@ spec:
       - JENKINS_AGENT_NAME=agent-k8s
       - JENKINS_SECRET=8580370ce0f0cac4d033e1afb4fb0eea824b29bd87c6ed54435ca6c77ddeab19
       - JENKINS_WEB_SOCKET=true
-    #args:
-    #  - "-url"
-    #  - "http://jenkins:8080"
-    #  - "-secret"
-    #  - "8580370ce0f0cac4d033e1afb4fb0eea824b29bd87c6ed54435ca6c77ddeab19"
-    #  - "-name"
-    #  - "agent-k8s"
-    #  - "-workDir"
-    #  - "/var/jenkins"
 
     volumeMounts:
       - name: agent-workdir
