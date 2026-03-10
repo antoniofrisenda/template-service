@@ -16,14 +16,14 @@ pipeline {
             steps {
                 sh 'rm -f app'
                 sh 'go mod download'
-                sh 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o app ./src/cmd/app'
+                sh 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o app ./cmd/app'
             }
         }
 
         stage('Test') {
             agent { label 'golang' }
             steps {
-                sh 'go test ./... || true'
+                sh 'go test ./...'
             }
         }
 
