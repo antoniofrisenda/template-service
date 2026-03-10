@@ -6,7 +6,22 @@ pipeline {
             agent { label 'k8s' }
             steps {
                 sh '''
-                    kubectl --context=docker-desktop cluster-info
+                    # Percorso temporaneo per il kubeconfig
+                    export KUBECONFIG=$(mktemp)
+
+                    # Genera un kubeconfig minimo per Docker Desktop
+                    kubectl config set-cluster docker-desktop \
+                        --server=https://kubernetes.docker.internal:6443 \
+                        --insecure-skip-tls-verify=true
+
+                    kubectl config set-context docker-desktop \
+                        --cluster=docker-desktop \
+                        --user=docker-desktop
+
+                    kubectl config use-context docker-desktop
+
+                    # Verifica la connessione
+                    kubectl cluster-info
                 '''
             }
         }
