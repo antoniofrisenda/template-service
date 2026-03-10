@@ -12,6 +12,13 @@ pipeline {
             }
         }
 
+        stage('Test Kubectl') {
+            agent { label 'k8s' }
+            steps {
+                sh 'kubectl'
+            }
+        }
+
         stage('Test') {
             agent { label 'golang' }
             steps {
@@ -31,13 +38,6 @@ pipeline {
             steps {
                 sh 'docker-compose -f .docker/docker-compose.yml down -v'
                 sh 'docker-compose -f .docker/docker-compose.yml up -d'
-            }
-        }
-
-        stage('Test Kubectl') {
-            agent { label 'k8s' }
-            steps {
-                sh 'kubectl'
             }
         }
 
