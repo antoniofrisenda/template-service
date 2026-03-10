@@ -6,12 +6,14 @@ pipeline {
             agent { label 'golang' }
             steps {
                 sh 'rm -f app'
+                 sh 'go get -u ./...'
+                sh 'go mod tidy'
                 sh 'go mod download'
                 sh 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o app ./src/cmd/app'
             }
         }
 
-        stage('Test') {
+        stage('Go Test') {
             agent { label 'golang' }
             steps {
                 sh 'go test ./...'
@@ -35,8 +37,11 @@ pipeline {
     }
 
     post {
-        always {
-            echo 'Pipeline completata.'
+        success{
+            echo 'Pipeline OK!'
+        }
+        failure {
+            echo 'Pipeline FAIL!'
         }
     }
 }

@@ -5,16 +5,13 @@ endif
 
 .PHONY: up down ps logs
 
-up:
+agents:
 	@docker compose -f .docker/docker-compose-agents.yml up --build -d
 	
-down:
-	@docker compose -f .docker/docker-compose-agents.yml down -v
-
-d-up:
+up:
 	@docker compose -f .docker/docker-compose.yml up --build -d
 
-d-down:
+down:
 	@docker compose -f .docker/docker-compose.yml down -v
 
 ps:
