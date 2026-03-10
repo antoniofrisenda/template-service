@@ -10,12 +10,7 @@ services:
       SERVICES: "s3"
     volumes:
       - ../init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
-    entrypoint:
-    - sh
-    - -c
-    - |
-      chmod +x /etc/localstack/init/ready.d/init-aws.sh && \
-      /usr/bin/localstack start
+    command: sh -c "chmod +x /etc/localstack/init/ready.d/init-aws.sh && localstack start"
 
   mongo:
     container_name: mongo
