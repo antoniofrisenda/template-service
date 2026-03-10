@@ -4,12 +4,12 @@ services:
       context: ..
       dockerfile: .docker/localstack.Dockerfile
     container_name: localstack
+    restart: always
     ports:
       - "4566:4566"      
     environment:
       DEBUG: "1"
       SERVICES: "s3"
-    restart: always
 
   mongo:
     container_name: mongo
