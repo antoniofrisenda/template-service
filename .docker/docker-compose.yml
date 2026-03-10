@@ -1,16 +1,4 @@
 services:
-  localstack:
-    build:
-      context: ..
-      dockerfile: .docker/localstack.Dockerfile
-    container_name: localstack
-    restart: always
-    ports:
-      - "4566:4566"      
-    environment:
-      DEBUG: "1"
-      SERVICES: "s3"
-
   mongo:
     container_name: mongo
     image: mongo:latest
@@ -38,6 +26,18 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:pass@mongo:27017/?authSource=admin&w=majority
       ME_CONFIG_BASICAUTH: "false"
 
+  localstack:
+    build:
+      context: ..
+      dockerfile: .docker/localstack.Dockerfile
+    container_name: localstack
+    restart: always
+    ports:
+      - "4566:4566"      
+    environment:
+      DEBUG: "1"
+      SERVICES: "s3"
+      
   app:
     container_name: document-service
     build:
