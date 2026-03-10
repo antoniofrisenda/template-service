@@ -4,7 +4,8 @@ RUN apk add --no-cache git ca-certificates
 
 WORKDIR /app
 
-COPY go.mod ./
+COPY go.mod go.sum ./
+RUN go mod download
 
 RUN go mod tidy
 
