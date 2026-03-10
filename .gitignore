@@ -16,8 +16,6 @@ bin/
 dist/
 tmp/
 
-# Go workspace
-go.sum
 
 # Environment
 .env

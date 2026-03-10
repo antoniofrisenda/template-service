@@ -2,15 +2,6 @@ pipeline {
     agent none
 
     stages {
-        /*stage('Test Kubectl') {
-            agent { label 'k8s' }
-            steps {
-                sh '''
-                    kubectl --context=docker-desktop cluster-info
-                '''
-            }
-        }*/
-
         stage('Build Go') {
             agent { label 'golang' }
             steps {
@@ -41,12 +32,11 @@ pipeline {
                 sh 'docker-compose -f .docker/docker-compose.yml up -d'
             }
         }
-
-    } 
+    }
 
     post {
         always {
             echo 'Pipeline completata.'
         }
     }
-} 
+}
