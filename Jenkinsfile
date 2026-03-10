@@ -6,12 +6,7 @@ pipeline {
             agent { label 'k8s' }
             steps {
                 sh '''
-                    mkdir -p $WORKSPACE/.kube
-                    cp /home/jenkins/.kube/config $WORKSPACE/.kube/config
-                    export KUBECONFIG=$WORKSPACE/.kube/config
-
-                    kubectl config use-context docker-desktop
-                    kubectl cluster-info
+                    kubectl --context=kind-jenkins-test cluster-info
                 '''
             }
         }
