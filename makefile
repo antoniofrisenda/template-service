@@ -11,11 +11,11 @@ endif
 up:
 	@docker compose -f .docker/docker-compose.yml up -d
 
+down:
+	@docker compose -f .docker/docker-compose.yml -f  down
+
 stop:
 	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml stop
-
-down:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml down
 
 start:
 	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml start
