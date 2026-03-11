@@ -5,19 +5,26 @@ endif
 
 .PHONY: up down ps logs
 
-agents:
-	@docker compose -f .docker/docker-compose-agents.yml up --build -d
-	
+.:
+	@docker compose -f .docker/docker-compose-agents.yml up -d
+
 up:
-	@docker compose -f .docker/docker-compose.yml up --build -d
+	@docker compose -f .docker/docker-compose.yml up -d
+
+stop:
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml stop
 
 down:
-	@docker compose -f .docker/docker-compose.yml down -v
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml down
+
+start:
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml start
 
 ps:
-	@docker compose -f .docker/docker-compose-agents.yml ps -a
-	@docker compose -f .docker/docker-compose.yml ps -a
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml ps -a
+
+clean:
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml down -v
 
 logs:
-	@docker compose -f .docker/docker-compose-agents.yml logs -f template-service --tail=100
-	@docker compose -f .docker/docker-compose.yml logs -f document-service --tail=100
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml logs -f
