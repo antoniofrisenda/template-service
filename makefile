@@ -3,7 +3,17 @@ ifneq (,$(wildcard ./.env))
 	export
 endif
 
-.PHONY: up down ps logs
+.PHONY: up down down-v stop start ps logs
+
+COMPOSE := 
+
+ifneq (,$(shell docker compose -f .docker/docker-compose.yml ps -qa 2>/dev/null))
+	COMPOSE += -f .docker/docker-compose.yml
+endif
+
+ifneq (,$(shell docker compose -f .docker/docker-compose-agents.yml ps -qa 2>/dev/null))
+	COMPOSE += -f .docker/docker-compose-agents.yml
+endif
 
 .:
 	@docker compose -f .docker/docker-compose-agents.yml up -d
@@ -18,13 +28,29 @@ down-v:
 	@docker compose -f .docker/docker-compose.yml down -v
 
 stop:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml stop
+ifneq (,$(COMPOSE))
+	@docker compose $(COMPOSE) stop
+else
+	@echo "No container."
+endif
 
 start:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml start
+ifneq (,$(COMPOSE))
+	@docker compose $(COMPOSE) start
+else
+	@echo "No container."
+endif
 
 ps:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml ps -a
+ifneq (,$(COMPOSE))
+	@docker compose $(COMPOSE) ps -a
+else
+	@echo "No container."
+endif
 
 logs:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml logs -f
+ifneq (,$(COMPOSE))
+	@docker compose $(COMPOSE) logs -f
+else
+	@echo "No container."
+endif
