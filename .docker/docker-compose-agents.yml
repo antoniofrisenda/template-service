@@ -42,7 +42,7 @@ services:
     volumes:
       - jenkins-agent-kubectl:/var/jenkins
       - /var/run/docker.sock:/var/run/docker.sock
-      - C:\Users\andre\.kube\config:/var/jenkins/.kube/config:ro
+      - ${HOME:-~}/.kube/config:/var/jenkins/.kube/config:ro
     environment:
       - JENKINS_URL=http://jenkins:8080
       - JENKINS_AGENT_NAME=agent-k8s
@@ -51,8 +51,6 @@ services:
       - KUBECONFIG=/var/jenkins/.kube/config
     depends_on:
       - jenkins
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
 volumes:
   jenkins_home:
