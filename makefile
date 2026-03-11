@@ -12,7 +12,10 @@ up:
 	@docker compose -f .docker/docker-compose.yml up -d
 
 down:
-	@docker compose -f .docker/docker-compose.yml -f  down
+	@docker compose -f .docker/docker-compose.yml down
+
+down-v:
+	@docker compose -f .docker/docker-compose.yml down -v
 
 stop:
 	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml stop
@@ -22,9 +25,6 @@ start:
 
 ps:
 	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml ps -a
-
-clean:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml down -v
 
 logs:
 	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml logs -f
