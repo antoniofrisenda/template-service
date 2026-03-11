@@ -33,7 +33,7 @@ services:
     depends_on:
       - jenkins
 
-agent-kubectl:
+  agent-kubectl:
     build:
       context: .
       dockerfile: kubectl.Dockerfile
