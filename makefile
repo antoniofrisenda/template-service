@@ -3,54 +3,61 @@ ifneq (,$(wildcard ./.env))
 	export
 endif
 
-.PHONY: up down down-v stop start ps logs
+.PHONY: up up-s up-a down down-s down-a down-v stop stop-s stop-a start start-s start-a ps ps-s ps-a log log-s log-a
 
-COMPOSE := 
+up-s:
+	@docker compose -f .docker/docker-compose.yml up -d
 
-ifneq (,$(shell docker compose -f .docker/docker-compose.yml ps -qa 2>/dev/null))
-	COMPOSE += -f .docker/docker-compose.yml
-endif
-
-ifneq (,$(shell docker compose -f .docker/docker-compose-agents.yml ps -qa 2>/dev/null))
-	COMPOSE += -f .docker/docker-compose-agents.yml
-endif
-
-.:
+up-a:
 	@docker compose -f .docker/docker-compose-agents.yml up -d
 
 up:
-	@docker compose -f .docker/docker-compose.yml up -d
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml up -d
 
-down:
+down-s:
 	@docker compose -f .docker/docker-compose.yml down
 
+down-a:
+	@docker compose -f .docker/docker-compose-agents.yml down
+
+down:
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml down
+
 down-v:
-	@docker compose -f .docker/docker-compose.yml down -v
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml down -v
+
+stop-s:
+	@docker compose -f .docker/docker-compose.yml stop
+
+stop-a:
+	@docker compose -f .docker/docker-compose-agents.yml stop
 
 stop:
-ifneq (,$(COMPOSE))
-	@docker compose $(COMPOSE) stop
-else
-	@echo "No container."
-endif
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml stop
+
+start-s:
+	@docker compose -f .docker/docker-compose.yml start
+
+start-a:
+	@docker compose -f .docker/docker-compose-agents.yml start
 
 start:
-ifneq (,$(COMPOSE))
-	@docker compose $(COMPOSE) start
-else
-	@echo "No container."
-endif
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml start
+
+ps-s:
+	@docker compose -f .docker/docker-compose.yml ps -a
+
+ps-a:
+	@docker compose -f .docker/docker-compose-agents.yml ps -a
 
 ps:
-ifneq (,$(COMPOSE))
-	@docker compose $(COMPOSE) ps -a
-else
-	@echo "No container."
-endif
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml ps -a
 
-logs:
-ifneq (,$(COMPOSE))
-	@docker compose $(COMPOSE) logs -f
-else
-	@echo "No container."
-endif
+log-s:
+	@docker compose -f .docker/docker-compose.yml logs -f
+
+log-a:
+	@docker compose -f .docker/docker-compose-agents.yml logs -f
+
+log:
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml logs -f

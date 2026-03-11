@@ -28,8 +28,8 @@ services:
 
   localstack:
     build:
-      context: .
-      dockerfile: localstack.Dockerfile
+      context: ..
+      dockerfile: .docker/localstack.Dockerfile
     container_name: localstack
     restart: always
     ports:
@@ -41,8 +41,8 @@ services:
   app:
     container_name: document-service
     build:
-      context: .
-      dockerfile: service.Dockerfile
+      context: ..
+      dockerfile: .docker/service.Dockerfile
     restart: always
     depends_on:
       - mongo
