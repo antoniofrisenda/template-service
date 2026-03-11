@@ -2,19 +2,11 @@ pipeline {
     agent none
 
     stages {
-        stage('Check config') {
+        stage('Kubectl Test') {
             agent { label 'k8s' }
             steps {
                 script {
                     sh 'ls -l $KUBECONFIG'
-                }
-            }
-        }
-
-        stage('Test Kubectl') {
-            agent { label 'k8s' }
-            steps {
-                script {
                     sh 'kubectl cluster-info'
                     sh 'kubectl get nodes'
                 }
