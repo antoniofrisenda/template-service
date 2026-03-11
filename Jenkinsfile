@@ -3,6 +3,7 @@ pipeline {
 
     stages {
         stage('Check config') {
+            agent { label 'k8s' }
             steps {
                 script {
                     sh 'ls -l $KUBECONFIG'
@@ -11,6 +12,7 @@ pipeline {
         }
 
         stage('Test Kubectl') {
+            agent { label 'k8s' }
             steps {
                 script {
                     sh 'kubectl cluster-info'
