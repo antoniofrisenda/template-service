@@ -2,6 +2,23 @@ pipeline {
     agent none
 
     stages {
+        stage('Check config') {
+            steps {
+                script {
+                    sh 'ls -l $KUBECONFIG'
+                }
+            }
+        }
+
+        stage('Test Kubectl') {
+            steps {
+                script {
+                    sh 'kubectl cluster-info'
+                    sh 'kubectl get nodes'
+                }
+            }
+        }
+
         stage('Build Go') {
             agent { label 'golang' }
             steps {

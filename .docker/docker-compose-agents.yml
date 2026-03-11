@@ -33,7 +33,7 @@ services:
     depends_on:
       - jenkins
 
-  agent-kubectl:
+agent-kubectl:
     build:
       context: .
       dockerfile: kubectl.Dockerfile
@@ -42,13 +42,17 @@ services:
     volumes:
       - jenkins-agent-kubectl:/var/jenkins
       - /var/run/docker.sock:/var/run/docker.sock
+      - C:\Users\andre\.kube\config:/var/jenkins/.kube/config:ro
     environment:
       - JENKINS_URL=http://jenkins:8080
       - JENKINS_AGENT_NAME=agent-k8s
       - JENKINS_SECRET=8580370ce0f0cac4d033e1afb4fb0eea824b29bd87c6ed54435ca6c77ddeab19
       - JENKINS_WEB_SOCKET=true
+      - KUBECONFIG=/var/jenkins/.kube/config
     depends_on:
       - jenkins
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   jenkins_home:
