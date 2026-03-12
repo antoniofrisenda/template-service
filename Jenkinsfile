@@ -5,7 +5,7 @@ pipeline {
         stage('Kubectl Test') {
             agent { label 'k8s' }
             steps {
-                script {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh 'ls -l $KUBECONFIG'
                     sh 'kubectl cluster-info'
                     sh 'kubectl get nodes'
