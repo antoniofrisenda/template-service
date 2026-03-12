@@ -11,7 +11,7 @@ WORKDIR /var/jenkins
 CMD curl -sO http://jenkins:8080/jnlpJars/agent.jar && \
     java -jar agent.jar \
     -url http://jenkins:8080/ \
-    -secret 160628eb86fca6fb9c33b5570733de32cfa2730a3f5cf85b29f8a5e2c4451f9c \
+    -secret cedb3609bb8426abb2e2a666d174ce8731d00287180a39aeeb54e3faccc2c158 \
     -name "agent-golang" \
     -webSocket \
     -workDir "/var/jenkins"

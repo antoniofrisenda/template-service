@@ -14,7 +14,7 @@ pipeline {
         }
 
         stage('Build Go') {
-            agent { label 'golang' }
+            agent { label 'go' }
             steps {
                 sh 'rm -f app'
                 sh 'go get -u ./...'
@@ -25,7 +25,7 @@ pipeline {
         }
 
         stage('Go Test') {
-            agent { label 'golang' }
+            agent { label 'go' }
             steps {
                 sh 'go test ./...'
             }
