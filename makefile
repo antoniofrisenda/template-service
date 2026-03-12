@@ -6,13 +6,13 @@ endif
 .PHONY: up up-s up-a down down-s down-a down-v stop stop-s stop-a start start-s start-a ps ps-s ps-a log log-s log-a
 
 up-s:
-	@docker compose -f .docker/docker-compose.yml up -d
+	@docker compose -f .docker/docker-compose.yml up -d --build
 
 up-a:
-	@docker compose -f .docker/docker-compose-agents.yml up -d
+	@docker compose -f .docker/docker-compose-agents.yml up -d --build
 
 up:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml up -d
+	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml up -d --build
 
 down-s:
 	@docker compose -f .docker/docker-compose.yml down
