@@ -3,61 +3,75 @@ ifneq (,$(wildcard ./.env))
 	export
 endif
 
-.PHONY: up up-s up-a down down-s down-a down-v stop stop-s stop-a start start-s start-a ps ps-s ps-a log log-s log-a
+COMPOSE_SERVICES = -f .docker/docker-compose.yml
+COMPOSE_AGENTS = -f .docker/docker-compose-agents.yml
+COMPOSE_ALL = $(COMPOSE_SERVICES) $(COMPOSE_AGENTS)
+
+.PHONY: up up-build up-s up-s-build up-a up-a-build down down-v down-s down-a stop stop-s stop-a start start-s start-a ps ps-s ps-a log log-s log-a
+
 
 up-s:
-	@docker compose -f .docker/docker-compose.yml up -d --build
+	@docker compose $(COMPOSE_SERVICES) up -d
+
+up-s-build:
+	@docker compose $(COMPOSE_SERVICES) up -d --build
 
 up-a:
-	@docker compose -f .docker/docker-compose-agents.yml up -d --build
+	@docker compose $(COMPOSE_AGENTS) up -d
+
+up-a-build:
+	@docker compose $(COMPOSE_AGENTS) up -d --build
 
 up:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml up -d --build
+	@docker compose $(COMPOSE_ALL) up -d
+
+up-build:
+	@docker compose $(COMPOSE_ALL) up -d --build
 
 down-s:
-	@docker compose -f .docker/docker-compose.yml down
+	@docker compose $(COMPOSE_SERVICES) down
 
 down-a:
-	@docker compose -f .docker/docker-compose-agents.yml down
+	@docker compose $(COMPOSE_AGENTS) down
 
 down:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml down
+	@docker compose $(COMPOSE_ALL) down
 
 down-v:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml down -v
+	@docker compose $(COMPOSE_ALL) down -v
 
 stop-s:
-	@docker compose -f .docker/docker-compose.yml stop
+	@docker compose $(COMPOSE_SERVICES) stop
 
 stop-a:
-	@docker compose -f .docker/docker-compose-agents.yml stop
+	@docker compose $(COMPOSE_AGENTS) stop
 
 stop:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml stop
+	@docker compose $(COMPOSE_ALL) stop
 
 start-s:
-	@docker compose -f .docker/docker-compose.yml start
+	@docker compose $(COMPOSE_SERVICES) start
 
 start-a:
-	@docker compose -f .docker/docker-compose-agents.yml start
+	@docker compose $(COMPOSE_AGENTS) start
 
 start:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml start
+	@docker compose $(COMPOSE_ALL) start
 
 ps-s:
-	@docker compose -f .docker/docker-compose.yml ps -a
+	@docker compose $(COMPOSE_SERVICES) ps -a
 
 ps-a:
-	@docker compose -f .docker/docker-compose-agents.yml ps -a
+	@docker compose $(COMPOSE_AGENTS) ps -a
 
 ps:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml ps -a
+	@docker compose $(COMPOSE_ALL) ps -a
 
 log-s:
-	@docker compose -f .docker/docker-compose.yml logs -f
+	@docker compose $(COMPOSE_SERVICES) logs -f
 
 log-a:
-	@docker compose -f .docker/docker-compose-agents.yml logs -f
+	@docker compose $(COMPOSE_AGENTS) logs -f
 
 log:
-	@docker compose -f .docker/docker-compose.yml -f .docker/docker-compose-agents.yml logs -f
+	@docker compose $(COMPOSE_ALL) logs -f
