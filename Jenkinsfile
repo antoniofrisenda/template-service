@@ -7,8 +7,8 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh 'ls -l "$KUBECONFIG"'
-                    sh 'kubectl --kubeconfig="$KUBECONFIG" cluster-info'
-                    sh 'kubectl --kubeconfig="$KUBECONFIG" get nodes'
+                    sh 'kubectl cluster-info'
+                    sh 'kubectl get nodes'
                 }
             }
         }
