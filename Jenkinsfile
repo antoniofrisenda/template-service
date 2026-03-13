@@ -40,6 +40,16 @@ pipeline {
 
         stage('Run Services') {
             agent { label 'docker' }
+            environment {
+                PORT = '3000'
+                DB = 'templates'
+                MONGO_URL = 'mongodb://root:pass@mongo:27017/templates?authSource=admin&w=majority'
+                AWS_ENDPOINT_URL = 'http://localstack:4566'
+                AWS_DEFAULT_REGION = 'us-east-1'
+                AWS_ACCESS_KEY_ID = 'test'
+                AWS_SECRET_ACCESS_KEY = 'test'
+                AWS_S3_BUCKET_NAME = 'document-bucket'
+            }
             steps {
                 sh 'docker-compose -f .docker/docker-compose.yml down -v'
                 sh 'docker-compose -f .docker/docker-compose.yml up -d'
