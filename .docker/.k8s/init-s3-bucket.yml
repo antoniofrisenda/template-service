@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-s3-bucket
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: aws-cli
+          image: amazon/aws-cli:latest
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              value: "test"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "test"
+            - name: AWS_DEFAULT_REGION
+              value: "us-east-1"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for LocalStack..."
+              sleep 10
+              aws s3 mb s3://document-bucket \
+                --endpoint-url http://localstack:4566 \
+                --region us-east-1
+              aws s3 ls --endpoint-url http://localstack:4566
+              echo "Bucket OK"

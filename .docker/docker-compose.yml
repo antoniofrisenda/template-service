@@ -27,26 +27,38 @@ services:
       ME_CONFIG_BASICAUTH: "false"
 
   localstack:
-    build:
-      context: ..
-      dockerfile: .docker/localstack.Dockerfile
+    image: localstack/localstack:latest
     container_name: localstack
     restart: always
     ports:
-      - "4566:4566"      
+      - "4566:4566"
     environment:
       DEBUG: "1"
       SERVICES: "s3"
-      
+
+  localstack-init:
+    image: amazon/aws-cli:latest
+    container_name: localstack-init
+    depends_on:
+      localstack:
+        condition: service_started
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+    entrypoint: ["sh", "-c", "sleep 5 && aws s3 mb s3://document-bucket --endpoint-url http://localstack:4566 || true"]
+
   app:
     container_name: document-service
     build:
       context: ..
-      dockerfile: .docker/service.Dockerfile
+      dockerfile: .docker/Dockerfile
     restart: always
     depends_on:
-      - mongo
-      - localstack
+      mongo:
+        condition: service_started
+      localstack-init:
+        condition: service_completed_successfully
     ports:
       - "3000:3000"
     environment:
