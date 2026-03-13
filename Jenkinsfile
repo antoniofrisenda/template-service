@@ -2,7 +2,7 @@ pipeline {
     agent none
 
     stages {
-        stage('Kube Test') {
+        stage('Kubectl Test') {
             agent { label 'k8s' }
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
@@ -34,40 +34,15 @@ pipeline {
         stage('Build Docker Image') {
             agent { label 'docker' }
             steps {
-                sh '''
-                    echo "Harbor12345" | docker login 192.168.1.10:8083 \
-                        --username "admin" \
-                        --password-stdin
-
-                    docker build -f .docker/Dockerfile -t 192.168.1.10:8083/document-service:latest .
-                    docker push 192.168.1.10:8083/document-service:latest
-                '''
+                sh 'docker build -f .docker/service.Dockerfile -t document-service .'
             }
         }
 
-        stage('Init S3 Bucket') {
-            agent { label 'k8s' }
+        stage('Run Services') {
+            agent { label 'docker' }
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
-                        kubectl --context kind-library delete job init-s3-bucket --ignore-not-found
-                        kubectl --context kind-library apply -f .docker/.k8s/init-s3-bucket.yml
-                        kubectl --context kind-library wait --for=condition=complete job/init-s3-bucket --timeout=120s
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy') {
-            agent { label 'k8s' }
-            steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
-                        kubectl --context kind-library apply -f .docker/.k8s/deployment.yml
-                        kubectl --context kind-library apply -f .docker/.k8s/service.yml
-                        kubectl --context kind-library rollout status deployment/document-service
-                    '''
-                }
+                sh 'docker-compose -f .docker/docker-compose.yml down -v'
+                sh 'docker-compose -f .docker/docker-compose.yml up -d'
             }
         }
     }
