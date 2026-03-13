@@ -4,11 +4,6 @@ pipeline {
     stages {
         stage('Kubectl Test') {
             agent { label 'k8s' }
-            environment {
-                JENKINS_URL = 'http://jenkins:8080'
-                JENKINS_AGENT_NAME = 'agent-k8s'
-                JENKINS_SECRET = 'c4e6de9aacd886eec6379d40acb91dd62f91b1085b1dcb9f07af937340fa8eed'
-            }
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh 'ls -l "$KUBECONFIG"'
@@ -45,16 +40,6 @@ pipeline {
 
         stage('Run Services') {
             agent { label 'docker' }
-            environment {
-                PORT = '3000'
-                DB = 'templates'
-                MONGO_URL = 'mongodb://root:pass@mongo:27017/templates?authSource=admin&w=majority'
-                AWS_ENDPOINT_URL = 'http://localstack:4566'
-                AWS_DEFAULT_REGION = 'us-east-1'
-                AWS_ACCESS_KEY_ID = 'test'
-                AWS_SECRET_ACCESS_KEY = 'test'
-                AWS_S3_BUCKET_NAME = 'document-bucket'
-            }
             steps {
                 sh 'docker-compose -f .docker/docker-compose.yml down -v'
                 sh 'docker-compose -f .docker/docker-compose.yml up -d'
