@@ -34,7 +34,7 @@ pipeline {
         stage('Build Docker Image') {
             agent { label 'docker' }
             steps {
-                sh 'docker build -f .docker/service.Dockerfile -t document-service .'
+                sh 'docker build -f .docker/Dockerfile -t document-service .'
             }
         }
 

@@ -12,7 +12,7 @@ services:
   agent-golang:
     build:
       context: .
-      dockerfile: golang.Dockerfile
+      dockerfile: agent-go.Dockerfile
     container_name: jenkins-agent-golang
     restart: always
     volumes:
@@ -24,7 +24,7 @@ services:
   agent-docker:
     build:
       context: .
-      dockerfile: docker.Dockerfile
+      dockerfile: agent-docker.Dockerfile
     container_name: jenkins-agent-docker
     restart: always
     volumes:
@@ -36,7 +36,7 @@ services:
   agent-kubectl:
     build:
       context: .
-      dockerfile: kubectl.Dockerfile
+      dockerfile: agent-k8s.Dockerfile
     container_name: jenkins-agent-kubectl
     restart: always
     volumes:

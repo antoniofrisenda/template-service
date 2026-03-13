@@ -42,7 +42,7 @@ services:
     container_name: document-service
     build:
       context: ..
-      dockerfile: .docker/service.Dockerfile
+      dockerfile: .docker/Dockerfile
     restart: always
     depends_on:
       - mongo
