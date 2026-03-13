@@ -4,6 +4,11 @@ pipeline {
     stages {
         stage('Kubectl Test') {
             agent { label 'k8s' }
+            environment {
+                JENKINS_URL = 'http://jenkins:8080'
+                JENKINS_AGENT_NAME = 'agent-k8s'
+                JENKINS_SECRET = 'c4e6de9aacd886eec6379d40acb91dd62f91b1085b1dcb9f07af937340fa8eed'
+            }
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh 'ls -l "$KUBECONFIG"'
