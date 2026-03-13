@@ -27,10 +27,8 @@ services:
       ME_CONFIG_BASICAUTH: "false"
 
   localstack:
-    build:
-      context: ..
-      dockerfile: .docker/localstack.Dockerfile
     container_name: localstack
+    image: localstack/localstack:latest
     restart: always
     ports:
       - "4566:4566"      

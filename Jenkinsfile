@@ -45,6 +45,19 @@ pipeline {
                 sh 'docker-compose -f .docker/docker-compose.yml up -d'
             }
         }
+
+        stage('Init S3 Bucket') {
+            agent { label 'docker' }
+            steps {
+                sh '''
+                until docker exec localstack awslocal s3 ls >/dev/null 2>&1; do
+                  sleep 2
+                done
+                docker exec localstack awslocal s3 mb s3://document-bucket
+                docker exec localstack awslocal s3 ls
+                '''
+            }
+        }
     }
 
     post {
