@@ -51,7 +51,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh '''
                         kubectl --context kind-library delete job init-s3-bucket --ignore-not-found
-                        kubectl --context kind-library apply -f .docker/.k8s/init-s3-bucket-job.yml
+                        kubectl --context kind-library apply -f .docker/.k8s/init-s3-bucket.yml
                         kubectl --context kind-library wait --for=condition=complete job/init-s3-bucket --timeout=120s
                     '''
                 }
