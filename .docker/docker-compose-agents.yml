@@ -43,10 +43,10 @@ services:
       - jenkins-agent-kubectl:/var/jenkins
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - JENKINS_URL: "http://jenkins:8080"
-      - JENKINS_AGENT_NAME: "agent-k8s"
-      - JENKINS_SECRET: "c4e6de9aacd886eec6379d40acb91dd62f91b1085b1dcb9f07af937340fa8eed"
-      - JENKINS_WEB_SOCKET: true
+      JENKINS_URL: "http://jenkins:8080"
+      JENKINS_AGENT_NAME: "agent-k8s"
+      JENKINS_SECRET: "c4e6de9aacd886eec6379d40acb91dd62f91b1085b1dcb9f07af937340fa8eed"
+      JENKINS_WEB_SOCKET: true
     depends_on:
       - jenkins
 
