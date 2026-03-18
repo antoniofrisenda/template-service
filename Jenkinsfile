@@ -32,12 +32,14 @@ pipeline {
                 stash name: 'coverage', includes: 'coverage.out'
             }
         }
-        
+
         stage('Sonar Scan') {
-            agent { label 'sonar-scanner' }
+            agent { 
+                label 'sonar-scanner'
+                customWorkspace '/var/jenkins/workspace/Document-service-Pipeline-sonar'
+            }
             options { skipDefaultCheckout() }
             steps {
-                deleteDir()  
                 unstash 'coverage'
                 sh 'sonar-scanner \
                     -Dsonar.projectKey=template-service \
@@ -48,7 +50,7 @@ pipeline {
                     -Dsonar.login=sqp_85265a6a0df86dd095f39024454d18e08ef33822'
             }
         }
-
+    
         stage('Build Docker Image') {
             agent { label 'docker' }
             steps {
