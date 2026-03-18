@@ -29,12 +29,14 @@ pipeline {
             steps {
                 sh 'go test ./... -coverprofile=coverage.out'
                 sh 'ls -l coverage.out'
+                stash name: 'coverage', includes: 'coverage.out'
             }
         }
         
         stage('Sonar Scan') {
             agent { label 'sonar-scanner' }
             steps {
+                unstash 'coverage'
                 sh 'sonar-scanner \
                     -Dsonar.projectKey=template-service \
                     -Dsonar.projectName="template-service" \
