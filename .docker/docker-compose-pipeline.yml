@@ -100,7 +100,7 @@ volumes:
   sonarqube-data:
   sonarqube-logs:
   sonarqube-extensions:
-  WORKDIR /var/jenkins:
   jenkins_agent_golang:
   jenkins_agent_docker:
+  jenkins_agent_sonar:
   jenkins-agent-kubectl:
