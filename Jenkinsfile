@@ -28,6 +28,7 @@ pipeline {
             agent { label 'go' }
             steps {
                 sh 'go test ./... -coverprofile=coverage.out'
+                sh 'ls -l coverage.out'
             }
         }
         
