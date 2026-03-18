@@ -33,25 +33,22 @@ pipeline {
             steps {
                 sh 'go test -covermode=atomic -coverpkg=./... ./... -coverprofile=coverage.out'
                 sh 'go tool cover -func=coverage.out'
-                archiveArtifacts artifacts: 'coverage.out', onlyIfSuccessful: true
+                stash name: 'coverage', includes: 'coverage.out'
             }
         }
 
         stage('Sonar Scan') {
             agent { label 'sonar-scanner' }
             steps {
-                ws('/tmp/jenkins-sonar-workspace') {
-                    deleteDir()
-                    checkout scm
-                    unarchive mapping: ['coverage.out': 'coverage.out']
-                    sh 'ls -l coverage.out'
-                    sh '''
-                    sonar-scanner \
-                        -Dproject.settings=sonar.properties \
-                        -Dsonar.host.url=http://sonarqube:9000 \
-                        -Dsonar.token=sqp_85265a6a0df86dd095f39024454d18e08ef33822
-                    '''
-                }
+                deleteDir()
+                checkout scm
+                unstash 'coverage'
+                sh '''
+                sonar-scanner \
+                    -Dproject.settings=sonar.properties \
+                    -Dsonar.host.url=http://sonarqube:9000 \
+                    -Dsonar.token=sqp_85265a6a0df86dd095f39024454d18e08ef33822
+                '''
             }
         }
 
