@@ -9,9 +9,6 @@ RUN apt-get update && \
     rm /tmp/sonar-scanner.zip && \
     rm -rf /var/lib/apt/lists/*
 
-ENV SONAR_SCANNER_HOME=/opt/sonar-scanner \
-    PATH="/opt/sonar-scanner/bin:${PATH}"
-
 RUN mkdir -p /var/jenkins
 
 WORKDIR /var/jenkins

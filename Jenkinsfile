@@ -28,15 +28,12 @@ pipeline {
             agent { label 'go' }
             steps {
                 sh 'go test ./... -coverprofile=coverage.out'
-                sh 'ls -l coverage.out'
-                archiveArtifacts artifacts: 'coverage.out', onlyIfSuccessful: true
             }
         }
 
         stage('Sonar Scan') {
             agent { label 'sonar-scanner' }
             steps {
-                unarchive mapping: ['coverage.out': 'coverage.out']
                 sh 'ls -l coverage.out'
                 sh '''
                 sonar-scanner \
