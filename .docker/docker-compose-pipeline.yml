@@ -99,6 +99,7 @@ volumes:
   jenkins_home:
   sonarqube-data:
   sonarqube-logs:
+  jenkins-agent-sonar:
   sonarqube-extensions:
   jenkins_agent_golang:
   jenkins_agent_docker:
