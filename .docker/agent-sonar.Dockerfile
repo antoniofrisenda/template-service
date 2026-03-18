@@ -1,5 +1,4 @@
 FROM jenkins/inbound-agent:latest
-
 USER root
 
 RUN apt-get update && \

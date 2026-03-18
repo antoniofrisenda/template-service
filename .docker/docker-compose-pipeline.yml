@@ -77,6 +77,7 @@ services:
       JENKINS_WEB_SOCKET: true
     depends_on:
       - jenkins
+      - sonarqube
 
   agent-sonar:
     build:

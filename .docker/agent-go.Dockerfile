@@ -1,5 +1,4 @@
 FROM golang:latest
-
 RUN apt-get update && \
     apt-get install -y curl default-jre docker.io ca-certificates unzip && \
     curl -L -o /tmp/sonar-scanner.zip \
@@ -10,7 +9,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /var/jenkins
-
 WORKDIR /var/jenkins
 
 CMD curl -sO http://jenkins:8080/jnlpJars/agent.jar && \
