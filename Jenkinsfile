@@ -35,6 +35,7 @@ pipeline {
         
         stage('Sonar Scan') {
             agent { label 'sonar-scanner' }
+            options { skipDefaultCheckout() }
             steps {
                 unstash 'coverage'
                 sh 'sonar-scanner \
