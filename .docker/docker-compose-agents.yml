@@ -1,4 +1,32 @@
 services:
+  postgresql:
+    image: postgres:latest
+    hostname: postgresql
+    container_name: postgresql
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - postgresql:/var/lib/postgresql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    depends_on:
+      - postgresql
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgresql:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    ports:
+      - "9000:9000"
+
   jenkins:
     image: jenkins/jenkins:lts
     restart: always
@@ -50,8 +78,28 @@ services:
     depends_on:
       - jenkins
 
+  agent-sonar:
+    build:
+      context: .
+      dockerfile: agent-sonar.Dockerfile
+    container_name: jenkins-agent-sonar
+    restart: always
+    volumes:
+      - jenkins_agent_docker:/var/jenkins
+    environment:
+      JENKINS_URL: "http://jenkins:8080"
+      JENKINS_AGENT_NAME: "agent-sonar"
+      JENKINS_SECRET: "af708d559b671ea70dcd8a480ffaef6b3ebc557a2d0580f455869321b8ee589f"
+      JENKINS_WEB_SOCKET: true
+    depends_on:
+      - jenkins
+
 volumes:
+  postgresql:
   jenkins_home:
+  sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:
   jenkins_agent_golang:
   jenkins_agent_docker:
   jenkins-agent-kubectl:
