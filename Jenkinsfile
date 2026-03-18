@@ -37,6 +37,7 @@ pipeline {
             agent { label 'sonar-scanner' }
             options { skipDefaultCheckout() }
             steps {
+                deleteDir()  
                 unstash 'coverage'
                 sh 'sonar-scanner \
                     -Dsonar.projectKey=template-service \
