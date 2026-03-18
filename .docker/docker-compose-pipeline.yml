@@ -90,6 +90,7 @@ services:
       JENKINS_URL: "http://jenkins:8080"
       JENKINS_AGENT_NAME: "agent-sonar"
       JENKINS_SECRET: "af708d559b671ea70dcd8a480ffaef6b3ebc557a2d0580f455869321b8ee589f"
+      JENKINS_AGENT_WORKDIR: "/var/jenkins"
       JENKINS_WEB_SOCKET: true
     depends_on:
       - jenkins
@@ -99,8 +100,8 @@ volumes:
   jenkins_home:
   sonarqube-data:
   sonarqube-logs:
+  jenkins_agent_sonar:
   sonarqube-extensions:
   jenkins_agent_golang:
   jenkins_agent_docker:
-  jenkins_agent_sonar:
   jenkins-agent-kubectl:
