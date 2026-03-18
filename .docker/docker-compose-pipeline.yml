@@ -85,7 +85,7 @@ services:
     container_name: jenkins-agent-sonar
     restart: always
     volumes:
-      - jenkins_agent_docker:/var/jenkins
+      - jenkins_agent_sonar:/var/jenkins
     environment:
       JENKINS_URL: "http://jenkins:8080"
       JENKINS_AGENT_NAME: "agent-sonar"
@@ -100,6 +100,7 @@ volumes:
   sonarqube-data:
   sonarqube-logs:
   sonarqube-extensions:
+  WORKDIR /var/jenkins:
   jenkins_agent_golang:
   jenkins_agent_docker:
   jenkins-agent-kubectl:

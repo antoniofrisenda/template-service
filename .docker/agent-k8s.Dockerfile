@@ -10,4 +10,5 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /var/jenkins && chown jenkins:jenkins /var/jenkins
+WORKDIR /var/jenkins
 USER jenkins

@@ -4,7 +4,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 COMPOSE_SERVICES = -f .docker/docker-compose.yml
-COMPOSE_AGENTS = -f .docker/docker-compose-agents.yml
+COMPOSE_AGENTS = -f .docker/docker-compose-pipeline.yml
 COMPOSE_ALL = $(COMPOSE_SERVICES) $(COMPOSE_AGENTS)
 
 .PHONY: up up-build up-s up-s-build up-a up-a-build down down-v down-s down-a stop stop-s stop-a start start-s start-a ps ps-s ps-a log log-s log-a

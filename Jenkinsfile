@@ -1,7 +1,20 @@
 pipeline {
     agent none
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     stages {
+        stage('Checkout Source') {
+            agent { label 'go' }
+            steps {
+                deleteDir()
+                checkout scm
+                stash name: 'source', includes: '**', excludes: '.git/**', useDefaultExcludes: false
+            }
+        }
+
         stage('Kubectl Test') {
             agent { label 'k8s' }
             steps {
@@ -16,6 +29,8 @@ pipeline {
         stage('Build Go') {
             agent { label 'go' }
             steps {
+                deleteDir()
+                unstash 'source'
                 sh 'rm -f app'
                 sh 'go get -u ./...'
                 sh 'go mod tidy'
@@ -27,26 +42,33 @@ pipeline {
         stage('Go Test') {
             agent { label 'go' }
             steps {
+                deleteDir()
+                unstash 'source'
                 sh 'go test ./... -coverprofile=coverage.out'
+                stash name: 'coverage', includes: 'coverage.out'
             }
         }
         
         stage('Sonar Scan') {
             agent { label 'sonar-scanner' }
             steps {
-                sh 'sonar-scanner \
-                    -Dsonar.projectKey=template-service \
-                    -Dsonar.projectName="template-service" \
-                    -Dsonar.sources=. \
-                    -Dsonar.go.coverage.reportPaths=coverage.out \
+                deleteDir()
+                unstash 'source'
+                unstash 'coverage'
+                sh '''
+                sonar-scanner \
+                    -Dproject.settings=sonar.properties \
                     -Dsonar.host.url=http://sonarqube:9000 \
-                    -Dsonar.login=-Dsonar.token=sqp_85265a6a0df86dd095f39024454d18e08ef33822'
+                    -Dsonar.token=sqp_85265a6a0df86dd095f39024454d18e08ef33822
+                '''
             }
         }
 
         stage('Build Docker Image') {
             agent { label 'docker' }
             steps {
+                deleteDir()
+                unstash 'source'
                 sh 'docker build -f .docker/Dockerfile -t document-service .'
             }
         }
@@ -54,6 +76,8 @@ pipeline {
         stage('Run Services') {
             agent { label 'docker' }
             steps {
+                deleteDir()
+                unstash 'source'
                 sh 'docker-compose -f .docker/docker-compose.yml down -v'
                 sh 'docker-compose -f .docker/docker-compose.yml up -d'
             }

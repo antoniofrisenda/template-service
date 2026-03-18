@@ -14,4 +14,6 @@ RUN apt-get update && \
 ENV SONAR_SCANNER_HOME=/opt/sonar-scanner \
     PATH="/opt/sonar-scanner/bin:${PATH}"
 
+RUN mkdir -p /var/jenkins && chown -R jenkins:jenkins /var/jenkins
+WORKDIR /var/jenkins
 USER jenkins
