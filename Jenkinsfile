@@ -31,7 +31,8 @@ pipeline {
         stage('Go Test') {
             agent { label 'go' }
             steps {
-                sh 'go test ./... -coverprofile=coverage.out'
+                sh 'go test -covermode=atomic -coverpkg=./... ./... -coverprofile=coverage.out'
+                sh 'go tool cover -func=coverage.out'
                 archiveArtifacts artifacts: 'coverage.out', onlyIfSuccessful: true
             }
         }
